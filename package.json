@@ -18,10 +18,10 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Eric-Miao/LifePM.git"
+    "url": "git+https://github.com/Eric-Miao/dsh-LifePM.git"
   },
-  "homepage": "https://github.com/Eric-Miao/LifePM#readme",
+  "homepage": "https://github.com/Eric-Miao/dsh-LifePM#readme",
   "bugs": {
-    "url": "https://github.com/Eric-Miao/LifePM/issues"
+    "url": "https://github.com/Eric-Miao/dsh-LifePM/issues"
   }
 }

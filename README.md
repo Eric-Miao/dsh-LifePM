@@ -1,6 +1,6 @@
 # 人生 PM · LifePM
 
-[![CI](https://github.com/Eric-Miao/LifePM/actions/workflows/ci.yml/badge.svg)](https://github.com/Eric-Miao/LifePM/actions/workflows/ci.yml)
+[![CI](https://github.com/Eric-Miao/dsh-LifePM/actions/workflows/ci.yml/badge.svg)](https://github.com/Eric-Miao/dsh-LifePM/actions/workflows/ci.yml)
 
 一个装在 DeepSeek Harness 里的**个人 / 家庭事项管理面板**。你们处在人生的探索期——很多事同时发生，很多事还没想清楚——所以它不逼你分类，而是先让你把脑子里的东西倒出来，再一起决定这个季度真正要押注的是什么。
 
