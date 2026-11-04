@@ -1,0 +1,14 @@
+# LifePM bundle patch — one loader row.
+#
+# Used when this package is selected as a profile bundle
+# (package.json `dsh.bundle.patch`). A profile's own cordis.patch.yml can
+# override `config` by targeting the `lifepm` id.
+#
+# The dashboard can also be mounted from a plain loader row; see README.md.
+- insert:
+    - id: lifepm
+      name: lifepm
+      config:
+        # Absolute path of the Markdown store. Omit to use ~/.dsh/lifepm.
+        # dataDir: /absolute/path/to/life-pm
+        pollSeconds: 3

@@ -1,0 +1,27 @@
+{
+  "name": "lifepm-workspace",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Build and test tooling for the LifePM plugin (the plugin itself has no runtime dependencies).",
+  "type": "module",
+  "scripts": {
+    "build": "node plugin/scripts/build.mjs",
+    "test": "node --test --test-force-exit plugin/tests/store.test.mjs plugin/tests/http.test.mjs plugin/tests/host.test.mjs plugin/tests/connectors.test.mjs plugin/tests/client.test.mjs",
+    "check": "node plugin/scripts/build.mjs && npm test"
+  },
+  "devDependencies": {
+    "esbuild": "^0.25.0",
+    "jsdom": "^25.0.1",
+    "react": "~18.3.1",
+    "react-dom": "~18.3.1"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Eric-Miao/LifePM.git"
+  },
+  "homepage": "https://github.com/Eric-Miao/LifePM#readme",
+  "bugs": {
+    "url": "https://github.com/Eric-Miao/LifePM/issues"
+  }
+}

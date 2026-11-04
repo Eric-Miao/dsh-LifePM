@@ -1,0 +1,8 @@
+node_modules/
+.npm-cache/
+*.log
+.DS_Store
+
+# Personal store: tasks, projects, journal and the ingress token.
+life-pm/
+.state.json
