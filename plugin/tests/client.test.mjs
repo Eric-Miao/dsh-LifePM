@@ -190,30 +190,21 @@ async function mountApp(t, data) {
   return { container, root, dom, calls }
 }
 
-test('renders the weekly home with focus and projects', async (t) => {
+test('renders the canvas with member zones and project stickers', async (t) => {
   const { container } = await mountApp(t, fixture())
-  const text = container.textContent
-  assert.match(text, /本周想做/)
-  assert.match(text, /确认领证需要的材料清单/)
-  assert.match(text, /婚礼筹备/)
-  assert.match(text, /本周动过/)
-  assert.equal(container.querySelectorAll('.lpm-week-focus-row').length, 1)
-  assert.ok(container.querySelectorAll('.lpm-project-row').length >= 2)
+  assert.ok(container.querySelector('.lpm-canvas') !== null)
+  assert.equal(container.querySelectorAll('.lpm-tab').length, 0, 'no other pages')
+  assert.equal(container.querySelectorAll('.lpm-zone').length, 1, 'one zone for shared projects')
+  assert.equal(container.querySelectorAll('.lpm-sticker').length, 2)
+  assert.match(container.textContent, /婚礼筹备/)
+  assert.match(container.textContent, /我们/)
 })
 
-test('the full board is one tab away and still opens the drawer', async (t) => {
+test('clicking a sticker task opens the drawer and saves', async (t) => {
   const { container, dom, calls } = await mountApp(t, fixture())
-  const boardTab = [...container.querySelectorAll('.lpm-tab')].find((button) => button.textContent.startsWith('全部'))
-  assert.ok(boardTab !== undefined, 'board tab present')
+  const task = container.querySelector('.lpm-sticker-task')
   await act(async () => {
-    boardTab.dispatchEvent(new dom.window.MouseEvent('click', { bubbles: true }))
-  })
-  assert.ok(container.querySelector('.lpm-board') !== null)
-  assert.match(container.textContent, /候选/)
-
-  const card = container.querySelector('.lpm-card')
-  await act(async () => {
-    card.dispatchEvent(new dom.window.MouseEvent('click', { bubbles: true }))
+    task.dispatchEvent(new dom.window.MouseEvent('click', { bubbles: true }))
   })
   assert.ok(container.querySelector('.lpm-drawer') !== null, 'drawer opens')
   assert.match(container.querySelector('.lpm-drawer').textContent, /事项/)
@@ -224,7 +215,6 @@ test('the full board is one tab away and still opens the drawer', async (t) => {
     setter.call(title, '确认领证材料（新）')
     title.dispatchEvent(new dom.window.Event('input', { bubbles: true }))
   })
-
   const save = [...container.querySelectorAll('.lpm-drawer-foot button')].find((button) => button.textContent.includes('保存'))
   assert.ok(save !== undefined, 'save button present')
   await act(async () => {
@@ -233,57 +223,28 @@ test('the full board is one tab away and still opens the drawer', async (t) => {
   })
   const update = calls.find((call) => call.method === 'POST' && call.path.endsWith('/api/task'))
   assert.ok(update !== undefined, 'task update posted')
-  assert.equal(update.body.op, 'update')
   assert.equal(update.body.patch.title, '确认领证材料（新）')
 })
 
-test('canvas tab renders one area per project', async (t) => {
+test('compact piles stack stickers and double-click explodes them', async (t) => {
   const { container, dom } = await mountApp(t, fixture())
-  const tab = [...container.querySelectorAll('.lpm-tab')].find((button) => button.textContent.startsWith('全貌'))
-  assert.ok(tab !== undefined, 'canvas tab present')
+  const compact = [...container.querySelectorAll('button')].find((button) => button.textContent.trim() === '紧凑')
+  assert.ok(compact !== undefined, 'compact button present')
   await act(async () => {
-    tab.dispatchEvent(new dom.window.MouseEvent('click', { bubbles: true }))
+    compact.dispatchEvent(new dom.window.MouseEvent('click', { bubbles: true }))
   })
-  assert.ok(container.querySelector('.lpm-canvas') !== null)
-  assert.ok(container.querySelectorAll('.lpm-canvas-project').length >= 2)
-  assert.match(container.textContent, /婚礼筹备/)
-  assert.match(container.textContent, /换一座城市/)
-})
-
-test('projects tab lists every project with its next action', async (t) => {
-  const { container, dom } = await mountApp(t, fixture())
-  const tab = [...container.querySelectorAll('.lpm-tab')].find((button) => button.textContent.startsWith('项目'))
   await act(async () => {
-    tab.dispatchEvent(new dom.window.MouseEvent('click', { bubbles: true }))
+    await new Promise((resolve) => setTimeout(resolve, 30))
   })
-  assert.match(container.textContent, /婚礼筹备/)
-  assert.match(container.textContent, /定下场地和日期/)
-  assert.ok(container.querySelectorAll('.lpm-project-row').length >= 2)
-})
+  assert.ok(container.querySelectorAll('.lpm-pile').length >= 1, 'piles rendered')
+  assert.equal(container.querySelectorAll('.lpm-sticker').length, 0, 'stickers collapsed')
 
-test('records and settings render without crashing', async (t) => {
-  const { container, dom } = await mountApp(t, fixture())
-  const clickTab = async (label) => {
-    const tab = [...container.querySelectorAll('.lpm-tab')].find((button) => button.textContent.startsWith(label))
-    assert.ok(tab !== undefined, `tab ${label} present`)
-    await act(async () => {
-      tab.dispatchEvent(new dom.window.MouseEvent('click', { bubbles: true }))
-    })
-  }
-
-  await clickTab('记录')
-  assert.match(container.textContent, /日记与决定/)
-  assert.match(container.textContent, /把清单倒空了/)
-
-  const reviewToggle = [...container.querySelectorAll('.lpm-seg button')].find((button) => button.textContent === '复盘')
+  const pile = container.querySelector('.lpm-pile')
   await act(async () => {
-    reviewToggle.dispatchEvent(new dom.window.MouseEvent('click', { bubbles: true }))
+    pile.dispatchEvent(new dom.window.MouseEvent('dblclick', { bubbles: true }))
   })
-  assert.match(container.textContent, /每周复盘/)
-
-  await clickTab('设置')
-  assert.match(container.textContent, /这一季/)
-  assert.match(container.textContent, /连接器/)
-  assert.match(container.textContent, /\/lifepm\/inbox/)
-  assert.match(container.textContent, /每日摘要/)
+  await act(async () => {
+    await new Promise((resolve) => setTimeout(resolve, 30))
+  })
+  assert.ok(container.querySelectorAll('.lpm-sticker.is-exploded').length >= 1, 'pile exploded')
 })

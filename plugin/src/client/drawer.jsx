@@ -86,7 +86,7 @@ export function TaskDrawer({ task, onClose }) {
   }
 
   const openProjectModal = () => {
-    showToast('先在「项目」页新建项目，再回来关联', 'error')
+    showToast('项目现在由 agent 或 Markdown 创建，先选一个已有项目', 'error')
   }
 
   return React.createElement(React.Fragment, null,
