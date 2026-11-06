@@ -41,7 +41,7 @@ window.__ModuleLoader__.load({
     inject: () => inject
   });
   module.exports = __toCommonJS(index_exports);
-  var import_react11 = __toESM(require("react"), 1);
+  var import_react12 = __toESM(require("react"), 1);
 
   // plugin/src/client/styles.css
   var styles_default = `/* ============================================================================
@@ -2320,10 +2320,268 @@ window.__ModuleLoader__.load({
   .lpm-picker-row input {
     accent-color: var(--lpm-accent);
   }
+
+  /* ============================================================= canvas ==== */
+
+  .lpm-canvas {
+    position: relative;
+    height: 100%;
+    min-height: 520px;
+    overflow: hidden;
+    background: var(--lpm-bg);
+    cursor: grab;
+    user-select: none;
+  }
+
+  .lpm-canvas:active {
+    cursor: grabbing;
+  }
+
+  .lpm-canvas-dots {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background-image: radial-gradient(circle, var(--lpm-line-strong) 1px, transparent 1.2px);
+    opacity: 0.55;
+  }
+
+  .lpm-canvas-world {
+    position: absolute;
+    top: 0;
+    left: 0;
+    transform-origin: 0 0;
+  }
+
+  .lpm-canvas-project {
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    border: 1px solid var(--lpm-line);
+    border-radius: 14px;
+    background: var(--lpm-bg);
+    box-shadow: var(--lpm-shadow);
+    overflow: hidden;
+  }
+
+  .lpm-canvas-project.is-dragging {
+    border-color: var(--lpm-line-strong);
+    box-shadow: 0 24px 60px -34px rgba(0, 0, 0, 0.55);
+  }
+
+  .lpm-canvas-project-head {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    padding: 11px 12px 8px;
+    border-bottom: 1px solid var(--lpm-line);
+    background: var(--lpm-wash);
+    cursor: grab;
+  }
+
+  .lpm-canvas-project-title {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    min-width: 0;
+  }
+
+  .lpm-canvas-project-name {
+    font-family: var(--lpm-serif);
+    font-size: 15px;
+    line-height: 1.2;
+    color: var(--lpm-ink);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .lpm-canvas-star {
+    flex: 0 0 auto;
+    padding: 0 5px;
+    border-radius: 4px;
+    background: var(--lpm-accent-soft);
+    color: var(--lpm-accent);
+    font-size: 9.5px;
+    line-height: 16px;
+  }
+
+  .lpm-canvas-project-meta {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    font-size: 10.5px;
+    color: var(--lpm-ink-3);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .lpm-canvas-open {
+    width: 20px;
+    height: 20px;
+    margin-left: auto;
+    opacity: 0.45;
+  }
+
+  .lpm-canvas-tasks {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow: hidden;
+    padding: 6px 6px 4px;
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+  }
+
+  .lpm-canvas-task {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    width: 100%;
+    padding: 4px 6px;
+    border: 0;
+    border-radius: 6px;
+    background: transparent;
+    color: var(--lpm-ink-2);
+    font-size: 11.5px;
+    line-height: 1.35;
+    text-align: left;
+    cursor: pointer;
+  }
+
+  .lpm-canvas-task:hover {
+    background: var(--lpm-wash);
+    color: var(--lpm-ink);
+  }
+
+  .lpm-canvas-dot {
+    flex: 0 0 auto;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--lpm-inbox);
+  }
+
+  .lpm-canvas-dot.s-now { background: var(--lpm-now); }
+  .lpm-canvas-dot.s-next { background: var(--lpm-next); }
+  .lpm-canvas-dot.s-waiting { background: var(--lpm-waiting); }
+  .lpm-canvas-dot.s-someday { background: var(--lpm-someday); }
+
+  .lpm-canvas-task-title {
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .lpm-canvas-focus {
+    color: var(--lpm-accent);
+    font-size: 14px;
+    line-height: 0;
+  }
+
+  .lpm-canvas-due {
+    flex: 0 0 auto;
+    font-size: 9.5px;
+    color: var(--lpm-ink-3);
+  }
+
+  .lpm-canvas-due[data-state="overdue"] { color: var(--lpm-danger); }
+  .lpm-canvas-due[data-state="today"] { color: var(--lpm-accent); }
+
+  .lpm-canvas-empty,
+  .lpm-canvas-more {
+    margin: 4px 6px;
+    font-size: 10.5px;
+    color: var(--lpm-ink-3);
+  }
+
+  .lpm-canvas-toolbar {
+    position: absolute;
+    top: 14px;
+    right: 16px;
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    padding: 4px 6px;
+    border: 1px solid var(--lpm-line);
+    border-radius: 10px;
+    background: color-mix(in srgb, var(--lpm-bg) 86%, transparent);
+    backdrop-filter: blur(8px);
+    box-shadow: var(--lpm-shadow);
+  }
+
+  .lpm-canvas-sep {
+    width: 1px;
+    height: 16px;
+    margin: 0 4px;
+    background: var(--lpm-line);
+  }
+
+  .lpm-canvas-zoom {
+    min-width: 36px;
+    text-align: center;
+    font-size: 10.5px;
+    color: var(--lpm-ink-3);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .lpm-canvas-plus {
+    width: 24px;
+    height: 24px;
+    padding: 0;
+    border: 0;
+    border-radius: 6px;
+    background: transparent;
+    color: var(--lpm-ink-2);
+    font-size: 14px;
+    line-height: 1;
+  }
+
+  .lpm-canvas-plus:hover {
+    background: var(--lpm-wash);
+    color: var(--lpm-ink);
+  }
+
+  .lpm-canvas-hint {
+    position: absolute;
+    left: 16px;
+    bottom: 12px;
+    font-size: 10.5px;
+    color: var(--lpm-ink-3);
+    pointer-events: none;
+  }
+
+  .lpm-canvas-legend {
+    position: absolute;
+    right: 16px;
+    bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 4px 10px;
+    border: 1px solid var(--lpm-line);
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--lpm-bg) 86%, transparent);
+    backdrop-filter: blur(6px);
+    font-size: 10.5px;
+    color: var(--lpm-ink-3);
+    pointer-events: none;
+  }
+
+  .lpm-canvas-legend span {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+  }
+
+  .lpm-canvas-legend i {
+    display: inline-block;
+  }
   `;
 
   // plugin/src/client/app.jsx
-  var import_react10 = __toESM(require("react"), 1);
+  var import_react11 = __toESM(require("react"), 1);
 
   // plugin/src/client/api.js
   var BASE = new URL("lifepm/api/", document.baseURI);
@@ -3280,15 +3538,316 @@ window.__ModuleLoader__.load({
     );
   }
 
-  // plugin/src/client/board.jsx
+  // plugin/src/client/canvas.jsx
   var import_react6 = __toESM(require("react"), 1);
+  var STORAGE_KEY = "lifepm.canvas.v1";
+  var BOX_WIDTH = 288;
+  var BOX_HEIGHT = 208;
+  var GAP = 26;
+  var PAD = 40;
+  var COLUMNS = 4;
+  function CanvasView() {
+    const { data, openTask, goTo, act } = usePM();
+    const [stored, setStored] = (0, import_react6.useState)(() => readStored());
+    const [view, setView] = (0, import_react6.useState)(() => stored.view);
+    const [dragging, setDragging] = (0, import_react6.useState)(null);
+    const [panning, setPanning] = (0, import_react6.useState)(null);
+    const containerRef = (0, import_react6.useRef)(null);
+    const movedRef = (0, import_react6.useRef)(false);
+    const viewRef = (0, import_react6.useRef)(view);
+    viewRef.current = view;
+    const projects = (0, import_react6.useMemo)(
+      () => data.projects.filter((project) => project.status !== "done" && project.status !== "dropped").sort((left, right) => {
+        const rank = { active: 0, paused: 1, idea: 2 };
+        const byStatus = (rank[left.status] ?? 3) - (rank[right.status] ?? 3);
+        if (byStatus !== 0) return byStatus;
+        return String(right.last_active ?? "").localeCompare(String(left.last_active ?? ""));
+      }),
+      [data.projects]
+    );
+    const tasksByProject = (0, import_react6.useMemo)(() => {
+      const map = /* @__PURE__ */ new Map();
+      for (const task of data.tasks) {
+        if (task.status === "done" || task.status === "dropped") continue;
+        const key = task.project ?? "__none__";
+        if (!map.has(key)) map.set(key, []);
+        map.get(key).push(task);
+      }
+      return map;
+    }, [data.tasks]);
+    const loose = tasksByProject.get("__none__") ?? [];
+    const nodes = (0, import_react6.useMemo)(
+      () => loose.length > 0 ? [...projects, { id: "__none__", name: "未归属", status: "active", last_active: void 0, virtual: true }] : projects,
+      [projects, loose.length]
+    );
+    const layout = (0, import_react6.useMemo)(() => {
+      const positions = { ...stored.positions };
+      let cursor = 0;
+      for (const project of nodes) {
+        if (positions[project.id] !== void 0) continue;
+        const column = cursor % COLUMNS;
+        const row = Math.floor(cursor / COLUMNS);
+        positions[project.id] = { x: PAD + column * (BOX_WIDTH + GAP), y: PAD + row * (BOX_HEIGHT + GAP) };
+        cursor += 1;
+      }
+      return positions;
+    }, [nodes, stored.positions]);
+    const width = (0, import_react6.useMemo)(() => {
+      const xs = Object.values(layout).map((position) => position.x);
+      return Math.max(0, ...xs) + BOX_WIDTH + PAD;
+    }, [layout]);
+    const height = (0, import_react6.useMemo)(() => {
+      const ys = Object.values(layout).map((position) => position.y);
+      return Math.max(0, ...ys) + BOX_HEIGHT + PAD;
+    }, [layout]);
+    const fit = (0, import_react6.useCallback)(() => {
+      const container = containerRef.current;
+      if (container === null) return;
+      const rect = container.getBoundingClientRect();
+      const scale = Math.max(0.3, Math.min(1, (rect.width - 80) / Math.max(width, 1), (rect.height - 80) / Math.max(height, 1)));
+      setView({ scale, x: (rect.width - width * scale) / 2, y: Math.max(24, (rect.height - height * scale) / 2) });
+    }, [width, height]);
+    (0, import_react6.useEffect)(() => {
+      if (stored.fitted === true) return;
+      const timer = setTimeout(() => {
+        fit();
+        setStored((current) => ({ ...current, fitted: true }));
+      }, 60);
+      return () => clearTimeout(timer);
+    }, []);
+    (0, import_react6.useEffect)(() => {
+      writeStored({ ...stored, view, fitted: true });
+    }, [view]);
+    const startDrag = (event, project) => {
+      if (event.button !== 0) return;
+      event.stopPropagation();
+      const position = layout[project.id];
+      const start = { pointerX: event.clientX, pointerY: event.clientY, x: position.x, y: position.y };
+      movedRef.current = false;
+      setDragging({ id: project.id, start });
+    };
+    (0, import_react6.useEffect)(() => {
+      if (dragging === null) return;
+      const onMove = (event) => {
+        const deltaX = (event.clientX - dragging.start.pointerX) / viewRef.current.scale;
+        const deltaY = (event.clientY - dragging.start.pointerY) / viewRef.current.scale;
+        if (Math.abs(deltaX) + Math.abs(deltaY) > 3) movedRef.current = true;
+        setStored((current) => ({
+          ...current,
+          positions: { ...current.positions, [dragging.id]: { x: dragging.start.x + deltaX, y: dragging.start.y + deltaY } }
+        }));
+      };
+      const onUp = () => {
+        setStored((current) => {
+          writeStored({ ...current, view: viewRef.current });
+          return current;
+        });
+        setDragging(null);
+      };
+      window.addEventListener("pointermove", onMove);
+      window.addEventListener("pointerup", onUp);
+      return () => {
+        window.removeEventListener("pointermove", onMove);
+        window.removeEventListener("pointerup", onUp);
+      };
+    }, [dragging]);
+    const startPan = (event) => {
+      if (event.button !== 0) return;
+      if (event.target.closest(".lpm-canvas-project") !== null || event.target.closest(".lpm-canvas-toolbar") !== null) return;
+      setPanning({ pointerX: event.clientX, pointerY: event.clientY, x: view.x, y: view.y });
+    };
+    (0, import_react6.useEffect)(() => {
+      if (panning === null) return;
+      const onMove = (event) => {
+        setView((current) => ({ ...current, x: panning.x + event.clientX - panning.pointerX, y: panning.y + event.clientY - panning.pointerY }));
+      };
+      const onUp = () => setPanning(null);
+      window.addEventListener("pointermove", onMove);
+      window.addEventListener("pointerup", onUp);
+      return () => {
+        window.removeEventListener("pointermove", onMove);
+        window.removeEventListener("pointerup", onUp);
+      };
+    }, [panning]);
+    (0, import_react6.useEffect)(() => {
+      const container = containerRef.current;
+      if (container === null) return;
+      const onWheel = (event) => {
+        event.preventDefault();
+        const rect = container.getBoundingClientRect();
+        const pointerX = event.clientX - rect.left;
+        const pointerY = event.clientY - rect.top;
+        const current = viewRef.current;
+        const nextScale = Math.min(2, Math.max(0.3, current.scale * (event.deltaY > 0 ? 0.92 : 1.08)));
+        const worldX = (pointerX - current.x) / current.scale;
+        const worldY = (pointerY - current.y) / current.scale;
+        setView({ scale: nextScale, x: pointerX - worldX * nextScale, y: pointerY - worldY * nextScale });
+      };
+      container.addEventListener("wheel", onWheel, { passive: false });
+      return () => container.removeEventListener("wheel", onWheel);
+    }, []);
+    const resetLayout = () => {
+      setStored({ positions: {}, view, fitted: true });
+      setTimeout(() => fit(), 30);
+    };
+    const zoomBy = (factor) => {
+      const container = containerRef.current;
+      if (container === null) return;
+      const rect = container.getBoundingClientRect();
+      const nextScale = Math.min(2, Math.max(0.3, view.scale * factor));
+      const centerX = rect.width / 2;
+      const centerY = rect.height / 2;
+      const worldX = (centerX - view.x) / view.scale;
+      const worldY = (centerY - view.y) / view.scale;
+      setView({ scale: nextScale, x: centerX - worldX * nextScale, y: centerY - worldY * nextScale });
+    };
+    const focusProject = (projectId) => {
+      const position = layout[projectId];
+      const container = containerRef.current;
+      if (position === void 0 || container === null) return;
+      const rect = container.getBoundingClientRect();
+      const scale = Math.max(0.8, Math.min(1.2, view.scale));
+      setView({ scale, x: rect.width / 2 - (position.x + BOX_WIDTH / 2) * scale, y: rect.height / 2 - (position.y + BOX_HEIGHT / 2) * scale });
+    };
+    const openTaskFromCanvas = (task) => {
+      if (movedRef.current) {
+        movedRef.current = false;
+        return;
+      }
+      openTask(task.id);
+    };
+    return import_react6.default.createElement(
+      "div",
+      { className: "lpm-canvas", ref: containerRef, onPointerDown: startPan },
+      import_react6.default.createElement("div", {
+        className: "lpm-canvas-dots",
+        style: { backgroundPosition: `${view.x}px ${view.y}px`, backgroundSize: `${24 * view.scale}px ${24 * view.scale}px` }
+      }),
+      import_react6.default.createElement(
+        "div",
+        { className: "lpm-canvas-world", style: { transform: `translate(${view.x}px, ${view.y}px) scale(${view.scale})` } },
+        nodes.map((project) => {
+          const tasks = project.virtual === true ? loose : tasksByProject.get(project.id) ?? [];
+          const focused = tasks.some((task) => task.focus_week === data.week);
+          const position = layout[project.id];
+          return import_react6.default.createElement(
+            "section",
+            {
+              key: project.id,
+              className: `lpm-canvas-project ${dragging?.id === project.id ? "is-dragging" : ""}`.trim(),
+              style: { left: position.x, top: position.y, width: BOX_WIDTH, height: BOX_HEIGHT },
+              onDoubleClick: () => focusProject(project.id)
+            },
+            import_react6.default.createElement(
+              "header",
+              {
+                className: "lpm-canvas-project-head",
+                onPointerDown: project.virtual === true ? void 0 : (event) => startDrag(event, project),
+                title: project.virtual === true ? "未归属的事项" : "拖动这块区域；双击居中"
+              },
+              import_react6.default.createElement(
+                "div",
+                { className: "lpm-canvas-project-title" },
+                import_react6.default.createElement("span", { className: "lpm-canvas-project-name" }, project.name),
+                focused ? import_react6.default.createElement("span", { className: "lpm-canvas-star" }, "本周") : null
+              ),
+              import_react6.default.createElement(
+                "div",
+                { className: "lpm-canvas-project-meta" },
+                import_react6.default.createElement("span", null, `${tasks.length} 件`),
+                project.virtual === true ? null : import_react6.default.createElement("span", null, describeActivity(project.last_active)),
+                project.virtual === true ? null : import_react6.default.createElement(IconButton, {
+                  icon: "arrow",
+                  label: "打开项目",
+                  className: "lpm-canvas-open",
+                  onClick: (event) => {
+                    event.stopPropagation();
+                    goTo("projects");
+                  }
+                })
+              )
+            ),
+            import_react6.default.createElement(
+              "div",
+              { className: "lpm-canvas-tasks" },
+              tasks.slice(0, 5).map((task) => {
+                const due = describeDue(task.due);
+                return import_react6.default.createElement(
+                  "button",
+                  {
+                    key: task.id,
+                    type: "button",
+                    className: "lpm-canvas-task",
+                    onClick: () => openTaskFromCanvas(task)
+                  },
+                  import_react6.default.createElement("span", { className: `lpm-canvas-dot s-${task.status}`.trim() }),
+                  import_react6.default.createElement("span", { className: "lpm-canvas-task-title" }, task.title),
+                  task.focus_week === data.week ? import_react6.default.createElement("span", { className: "lpm-canvas-focus" }, "·") : null,
+                  due === null ? null : import_react6.default.createElement("span", { className: "lpm-canvas-due", "data-state": due.state }, due.text)
+                );
+              }),
+              tasks.length === 0 ? import_react6.default.createElement("p", { className: "lpm-canvas-empty" }, "没有待办") : null,
+              tasks.length > 5 ? import_react6.default.createElement("p", { className: "lpm-canvas-more" }, `还有 ${tasks.length - 5} 件`) : null
+            )
+          );
+        })
+      ),
+      import_react6.default.createElement(
+        "div",
+        { className: "lpm-canvas-toolbar" },
+        import_react6.default.createElement(IconButton, { icon: "refresh", label: "适应画布", onClick: fit }),
+        import_react6.default.createElement("span", { className: "lpm-canvas-sep" }),
+        import_react6.default.createElement("button", { type: "button", className: "lpm-canvas-plus", "aria-label": "缩小", onClick: () => zoomBy(0.88) }, "－"),
+        import_react6.default.createElement("span", { className: "lpm-canvas-zoom" }, `${Math.round(view.scale * 100)}%`),
+        import_react6.default.createElement("button", { type: "button", className: "lpm-canvas-plus", "aria-label": "放大", onClick: () => zoomBy(1.12) }, "＋"),
+        import_react6.default.createElement("span", { className: "lpm-canvas-sep" }),
+        import_react6.default.createElement(Button, { size: "sm", variant: "ghost", onClick: resetLayout }, "整理布局")
+      ),
+      import_react6.default.createElement(
+        "div",
+        { className: "lpm-canvas-legend" },
+        ["now", "next", "waiting", "someday"].map((status) => import_react6.default.createElement(
+          "span",
+          { key: status },
+          import_react6.default.createElement("i", { className: `lpm-canvas-dot s-${status}` }),
+          { now: "候选", next: "接下来", waiting: "等待", someday: "也许" }[status]
+        ))
+      ),
+      import_react6.default.createElement("div", { className: "lpm-canvas-hint" }, "拖动空白处平移 · 滚轮缩放 · 拖项目标题移动 · 双击项目居中")
+    );
+  }
+  function readStored() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (raw === null) return { positions: {}, view: { x: 0, y: 0, scale: 1 }, fitted: false };
+      const parsed = JSON.parse(raw);
+      const positions = parsed !== null && typeof parsed.positions === "object" && parsed.positions !== null ? parsed.positions : {};
+      const view = parsed !== null && typeof parsed.view === "object" && parsed.view !== null ? parsed.view : { x: 0, y: 0, scale: 1 };
+      return {
+        positions,
+        view: { x: Number(view.x) || 0, y: Number(view.y) || 0, scale: Math.min(2, Math.max(0.3, Number(view.scale) || 1)) },
+        fitted: parsed !== null && parsed.fitted === true
+      };
+    } catch {
+      return { positions: {}, view: { x: 0, y: 0, scale: 1 }, fitted: false };
+    }
+  }
+  function writeStored(value) {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(value));
+    } catch {
+    }
+  }
+
+  // plugin/src/client/board.jsx
+  var import_react7 = __toESM(require("react"), 1);
   var COLUMN_ORDER = OPEN_STATUSES;
   function BoardView({ blank = false }) {
-    return blank === true ? import_react6.default.createElement(BlankState) : import_react6.default.createElement(BoardInner);
+    return blank === true ? import_react7.default.createElement(BlankState) : import_react7.default.createElement(BoardInner);
   }
   function BoardInner() {
     const { data } = usePM();
-    const groups = (0, import_react6.useMemo)(() => {
+    const groups = (0, import_react7.useMemo)(() => {
       const map = { inbox: [], now: [], next: [], waiting: [], someday: [], done: [] };
       for (const task of data.tasks) {
         if (task.status === "dropped") continue;
@@ -3297,22 +3856,22 @@ window.__ModuleLoader__.load({
       map.done = [...map.done].sort((left, right) => String(right.done_at ?? right.updated ?? "").localeCompare(String(left.done_at ?? left.updated ?? "")));
       return map;
     }, [data.tasks]);
-    const [showDone, setShowDone] = (0, import_react6.useState)(false);
-    const [dragging, setDragging] = (0, import_react6.useState)(null);
-    const [dropTarget, setDropTarget] = (0, import_react6.useState)(null);
+    const [showDone, setShowDone] = (0, import_react7.useState)(false);
+    const [dragging, setDragging] = (0, import_react7.useState)(null);
+    const [dropTarget, setDropTarget] = (0, import_react7.useState)(null);
     const { act } = usePM();
     const moveTask = async (id, status) => {
       if (id === null) return;
       void act(() => api.updateTask(id, { status }), `已移到「${STATUS_LABELS[status] ?? status}」`);
     };
-    return import_react6.default.createElement(
+    return import_react7.default.createElement(
       "div",
       { className: "lpm-view" },
-      import_react6.default.createElement(StatsLine, null),
-      import_react6.default.createElement(
+      import_react7.default.createElement(StatsLine, null),
+      import_react7.default.createElement(
         "div",
         { className: "lpm-board" },
-        COLUMN_ORDER.map((status) => import_react6.default.createElement(Column, {
+        COLUMN_ORDER.map((status) => import_react7.default.createElement(Column, {
           key: status,
           status,
           tasks: groups[status],
@@ -3330,7 +3889,7 @@ window.__ModuleLoader__.load({
             void moveTask(id, status);
           }
         })),
-        showDone ? import_react6.default.createElement(Column, {
+        showDone ? import_react7.default.createElement(Column, {
           key: "done",
           status: "done",
           tasks: groups.done,
@@ -3350,50 +3909,50 @@ window.__ModuleLoader__.load({
           }
         }) : null
       ),
-      import_react6.default.createElement(
+      import_react7.default.createElement(
         "div",
         { className: "lpm-stats", style: { paddingTop: 10 } },
-        import_react6.default.createElement("button", {
+        import_react7.default.createElement("button", {
           type: "button",
           className: "lpm-btn lpm-btn-sm lpm-btn-ghost",
           onClick: () => setShowDone((current) => !current)
         }, showDone ? "收起已完成" : `显示已完成（${groups.done.length}）`),
-        import_react6.default.createElement("span", { className: "lpm-sep" }),
-        import_react6.default.createElement("span", { className: "lpm-muted" }, "本周完成 ", import_react6.default.createElement("b", { style: { fontFamily: "var(--lpm-serif)" } }, data.stats.doneThisWeek), " 件")
+        import_react7.default.createElement("span", { className: "lpm-sep" }),
+        import_react7.default.createElement("span", { className: "lpm-muted" }, "本周完成 ", import_react7.default.createElement("b", { style: { fontFamily: "var(--lpm-serif)" } }, data.stats.doneThisWeek), " 件")
       )
     );
   }
   function StatsLine() {
     const { data } = usePM();
     const stats = data.stats;
-    return import_react6.default.createElement(
+    return import_react7.default.createElement(
       "div",
       { className: "lpm-stats" },
-      import_react6.default.createElement("span", { className: "lpm-stat" }, import_react6.default.createElement("b", null, stats.now), "候选"),
-      import_react6.default.createElement("span", { className: "lpm-sep" }),
-      import_react6.default.createElement("span", { className: "lpm-stat" }, import_react6.default.createElement("b", null, stats.waiting), "等待"),
-      import_react6.default.createElement("span", { className: "lpm-sep" }),
-      import_react6.default.createElement("span", { className: "lpm-stat" }, import_react6.default.createElement("b", null, stats.inboxTasks + stats.inbox), "收件箱"),
-      import_react6.default.createElement("span", { className: "lpm-sep" }),
-      import_react6.default.createElement("span", { className: "lpm-stat" }, import_react6.default.createElement("b", null, stats.dueToday), "今天到期"),
-      stats.overdue > 0 ? import_react6.default.createElement(
-        import_react6.default.Fragment,
+      import_react7.default.createElement("span", { className: "lpm-stat" }, import_react7.default.createElement("b", null, stats.now), "候选"),
+      import_react7.default.createElement("span", { className: "lpm-sep" }),
+      import_react7.default.createElement("span", { className: "lpm-stat" }, import_react7.default.createElement("b", null, stats.waiting), "等待"),
+      import_react7.default.createElement("span", { className: "lpm-sep" }),
+      import_react7.default.createElement("span", { className: "lpm-stat" }, import_react7.default.createElement("b", null, stats.inboxTasks + stats.inbox), "收件箱"),
+      import_react7.default.createElement("span", { className: "lpm-sep" }),
+      import_react7.default.createElement("span", { className: "lpm-stat" }, import_react7.default.createElement("b", null, stats.dueToday), "今天到期"),
+      stats.overdue > 0 ? import_react7.default.createElement(
+        import_react7.default.Fragment,
         null,
-        import_react6.default.createElement("span", { className: "lpm-sep" }),
-        import_react6.default.createElement("span", { className: "lpm-stat", style: { color: "var(--lpm-danger)" } }, import_react6.default.createElement("b", { style: { color: "var(--lpm-danger)" } }, stats.overdue), "逾期")
+        import_react7.default.createElement("span", { className: "lpm-sep" }),
+        import_react7.default.createElement("span", { className: "lpm-stat", style: { color: "var(--lpm-danger)" } }, import_react7.default.createElement("b", { style: { color: "var(--lpm-danger)" } }, stats.overdue), "逾期")
       ) : null
     );
   }
   function Column({ status, tasks, dragging, isDrop, onDragStart, onDragEnd, onDragOver, onDrop, doneColumn = false }) {
     const { data } = usePM();
-    const [adding, setAdding] = (0, import_react6.useState)(false);
-    const dropRef = (0, import_react6.useRef)(null);
+    const [adding, setAdding] = (0, import_react7.useState)(false);
+    const dropRef = (0, import_react7.useRef)(null);
     const onDragOverEvent = (event) => {
       event.preventDefault();
       event.dataTransfer.dropEffect = "move";
       onDragOver(true);
     };
-    return import_react6.default.createElement(
+    return import_react7.default.createElement(
       "section",
       {
         className: `lpm-col ${isDrop ? "is-drop" : ""} ${doneColumn ? "is-done-col" : ""}`.trim(),
@@ -3409,24 +3968,24 @@ window.__ModuleLoader__.load({
           if (id !== null && id !== void 0 && id !== "") onDrop(id);
         }
       },
-      import_react6.default.createElement(
+      import_react7.default.createElement(
         "header",
         { className: "lpm-col-head" },
-        import_react6.default.createElement("span", { className: "lpm-col-dot" }),
-        import_react6.default.createElement("span", { className: "lpm-col-title" }, STATUS_LABELS[status]),
-        import_react6.default.createElement("span", { className: "lpm-col-count" }, tasks.length + (status === "inbox" ? data.inbox.length : 0)),
-        import_react6.default.createElement("span", { className: "lpm-spacer" }),
-        doneColumn ? null : import_react6.default.createElement(IconButton, {
+        import_react7.default.createElement("span", { className: "lpm-col-dot" }),
+        import_react7.default.createElement("span", { className: "lpm-col-title" }, STATUS_LABELS[status]),
+        import_react7.default.createElement("span", { className: "lpm-col-count" }, tasks.length + (status === "inbox" ? data.inbox.length : 0)),
+        import_react7.default.createElement("span", { className: "lpm-spacer" }),
+        doneColumn ? null : import_react7.default.createElement(IconButton, {
           icon: "plus",
           label: `在「${STATUS_LABELS[status]}」里添加`,
           onClick: () => setAdding(true)
         })
       ),
-      import_react6.default.createElement(
+      import_react7.default.createElement(
         "div",
         { className: "lpm-col-body" },
-        status === "inbox" ? import_react6.default.createElement(InboxCaptures) : null,
-        tasks.map((task) => import_react6.default.createElement(TaskCard, {
+        status === "inbox" ? import_react7.default.createElement(InboxCaptures) : null,
+        tasks.map((task) => import_react7.default.createElement(TaskCard, {
           key: task.id,
           task,
           people: data.meta.people,
@@ -3435,9 +3994,9 @@ window.__ModuleLoader__.load({
           onDragStart,
           onDragEnd
         })),
-        !doneColumn && tasks.length === 0 && status !== "inbox" ? import_react6.default.createElement("div", { className: "lpm-col-empty" }, "拖到这里") : null,
-        doneColumn && tasks.length === 0 ? import_react6.default.createElement("div", { className: "lpm-col-empty" }, "这一周还没完成的事") : null,
-        !doneColumn && adding ? import_react6.default.createElement(QuickAdd, {
+        !doneColumn && tasks.length === 0 && status !== "inbox" ? import_react7.default.createElement("div", { className: "lpm-col-empty" }, "拖到这里") : null,
+        doneColumn && tasks.length === 0 ? import_react7.default.createElement("div", { className: "lpm-col-empty" }, "这一周还没完成的事") : null,
+        !doneColumn && adding ? import_react7.default.createElement(QuickAdd, {
           status,
           autoFocus: true,
           onDone: () => setAdding(false)
@@ -3447,7 +4006,7 @@ window.__ModuleLoader__.load({
   }
   function InboxCaptures() {
     const { data, act } = usePM();
-    const [busyIndex, setBusyIndex] = (0, import_react6.useState)(null);
+    const [busyIndex, setBusyIndex] = (0, import_react7.useState)(null);
     if (data.inbox.length === 0) return null;
     const visible = data.inbox.slice(0, 6);
     const hidden = data.inbox.length - visible.length;
@@ -3467,32 +4026,32 @@ window.__ModuleLoader__.load({
         setBusyIndex(null);
       }
     };
-    return import_react6.default.createElement(
-      import_react6.default.Fragment,
+    return import_react7.default.createElement(
+      import_react7.default.Fragment,
       null,
-      visible.map((item) => import_react6.default.createElement(
+      visible.map((item) => import_react7.default.createElement(
         "div",
         { key: `${item.line}-${item.index}`, className: "lpm-inbox-item" },
-        import_react6.default.createElement(
+        import_react7.default.createElement(
           "p",
           null,
           clip(item.text, 120),
-          import_react6.default.createElement(
+          import_react7.default.createElement(
             "span",
             { className: "lpm-inbox-meta" },
             `${item.channel === "app" ? "快速捕获" : item.channel}${item.createdAt === void 0 ? "" : ` · ${formatStamp(item.createdAt)}`}`
           )
         ),
-        import_react6.default.createElement(
+        import_react7.default.createElement(
           "div",
           { className: "lpm-inbox-actions" },
-          import_react6.default.createElement(IconButton, {
+          import_react7.default.createElement(IconButton, {
             icon: "arrow",
             label: "转为任务",
             disabled: busyIndex === item.index,
             onClick: () => void promote(item.index)
           }),
-          import_react6.default.createElement(IconButton, {
+          import_react7.default.createElement(IconButton, {
             icon: "trash",
             label: "丢弃",
             className: "is-danger",
@@ -3501,14 +4060,14 @@ window.__ModuleLoader__.load({
           })
         )
       )),
-      hidden > 0 ? import_react6.default.createElement("div", { className: "lpm-muted", style: { fontSize: 11, padding: "2px 2px 0" } }, `还有 ${hidden} 条待整理`) : null,
-      import_react6.default.createElement("div", { style: { height: 2 } })
+      hidden > 0 ? import_react7.default.createElement("div", { className: "lpm-muted", style: { fontSize: 11, padding: "2px 2px 0" } }, `还有 ${hidden} 条待整理`) : null,
+      import_react7.default.createElement("div", { style: { height: 2 } })
     );
   }
   function TaskCard({ task, people, areas, projects, onDragStart, onDragEnd, compact = false }) {
     const { data, openTask, act } = usePM();
     const focused = typeof task.focus_week === "string" && task.focus_week === data.week;
-    const [dragging, setDragging] = (0, import_react6.useState)(false);
+    const [dragging, setDragging] = (0, import_react7.useState)(false);
     const due = describeDue(task.due);
     const project = projects.find((item) => item.id === task.project || item.name === task.project);
     const area = (areas ?? []).find((item) => item.id === task.area);
@@ -3517,7 +4076,7 @@ window.__ModuleLoader__.load({
       event.stopPropagation();
       void act(() => api.updateTask(task.id, { status: done ? "now" : "done" }), done ? "已重新打开" : `完成：${clip(task.title, 24)}`);
     };
-    return import_react6.default.createElement(
+    return import_react7.default.createElement(
       "article",
       {
         className: `lpm-card ${done ? "is-done" : ""} ${dragging ? "is-dragging" : ""}`.trim(),
@@ -3543,64 +4102,64 @@ window.__ModuleLoader__.load({
         },
         "aria-label": task.title
       },
-      import_react6.default.createElement("button", {
+      import_react7.default.createElement("button", {
         type: "button",
         className: `lpm-check ${done ? "is-checked" : ""}`.trim(),
         "aria-label": done ? "重新打开" : "完成",
         onClick: complete
-      }, done ? import_react6.default.createElement(Icon, { name: "check", size: 10 }) : null),
-      import_react6.default.createElement(
+      }, done ? import_react7.default.createElement(Icon, { name: "check", size: 10 }) : null),
+      import_react7.default.createElement(
         "div",
         { className: "lpm-card-main" },
-        import_react6.default.createElement(
+        import_react7.default.createElement(
           "div",
           { className: "lpm-card-title" },
-          task.priority === "p0" ? import_react6.default.createElement("span", { className: "lpm-pri", style: { marginRight: 5 } }, "!") : null,
+          task.priority === "p0" ? import_react7.default.createElement("span", { className: "lpm-pri", style: { marginRight: 5 } }, "!") : null,
           task.title
         ),
-        project !== void 0 || due !== null || task.owner !== void 0 || area !== void 0 || task.priority === "p1" ? import_react6.default.createElement(
+        project !== void 0 || due !== null || task.owner !== void 0 || area !== void 0 || task.priority === "p1" ? import_react7.default.createElement(
           "div",
           { className: "lpm-card-meta" },
-          project !== void 0 ? import_react6.default.createElement(
+          project !== void 0 ? import_react7.default.createElement(
             "span",
             { className: "lpm-chip" },
-            import_react6.default.createElement("span", { className: "lpm-huedot", style: { background: `hsl(${areaHue(project.area ?? project.id)} 45% 52%)` } }),
+            import_react7.default.createElement("span", { className: "lpm-huedot", style: { background: `hsl(${areaHue(project.area ?? project.id)} 45% 52%)` } }),
             clip(project.name, 14)
-          ) : area !== void 0 ? import_react6.default.createElement(
+          ) : area !== void 0 ? import_react7.default.createElement(
             "span",
             { className: "lpm-chip" },
-            import_react6.default.createElement("span", { className: "lpm-huedot", style: { background: `hsl(${areaHue(area.id)} 45% 52%)` } }),
+            import_react7.default.createElement("span", { className: "lpm-huedot", style: { background: `hsl(${areaHue(area.id)} 45% 52%)` } }),
             area.name
           ) : null,
-          due !== null ? import_react6.default.createElement(
+          due !== null ? import_react7.default.createElement(
             "span",
             { className: "lpm-due", "data-state": due.state },
-            import_react6.default.createElement(Icon, { name: "calendar", size: 11 }),
+            import_react7.default.createElement(Icon, { name: "calendar", size: 11 }),
             due.text
           ) : null,
-          task.status === "waiting" && task.waiting_on !== void 0 ? import_react6.default.createElement(
+          task.status === "waiting" && task.waiting_on !== void 0 ? import_react7.default.createElement(
             "span",
             { className: "lpm-due", title: task.waiting_on },
-            import_react6.default.createElement(Icon, { name: "clock", size: 11 }),
+            import_react7.default.createElement(Icon, { name: "clock", size: 11 }),
             clip(task.waiting_on, 10)
           ) : null,
-          focused ? import_react6.default.createElement("span", { className: "lpm-chip lpm-chip-focus", title: "本周想做" }, "本周") : null,
-          import_react6.default.createElement("span", { style: { flex: "1 1 auto" } }),
-          task.owner !== void 0 ? import_react6.default.createElement(
+          focused ? import_react7.default.createElement("span", { className: "lpm-chip lpm-chip-focus", title: "本周想做" }, "本周") : null,
+          import_react7.default.createElement("span", { style: { flex: "1 1 auto" } }),
+          task.owner !== void 0 ? import_react7.default.createElement(
             "span",
             { className: "lpm-avatar", "data-owner": task.owner, title: `负责：${task.owner === "both" ? "两个人" : task.owner === "me" ? "我" : "TA"}` },
             ownerInitial(task.owner, people)
           ) : null
         ) : null,
-        compact !== true && task.notes !== "" ? import_react6.default.createElement("div", { className: "lpm-card-note" }, clip(task.notes, 110)) : null
+        compact !== true && task.notes !== "" ? import_react7.default.createElement("div", { className: "lpm-card-note" }, clip(task.notes, 110)) : null
       )
     );
   }
   function BlankState() {
     const { data, act, goTo, showToast } = usePM();
-    const [text, setText] = (0, import_react6.useState)("");
-    const [busy, setBusy] = (0, import_react6.useState)(false);
-    const inputRef = (0, import_react6.useRef)(null);
+    const [text, setText] = (0, import_react7.useState)("");
+    const [busy, setBusy] = (0, import_react7.useState)(false);
+    const inputRef = (0, import_react7.useRef)(null);
     const submit = async () => {
       const value = text.trim();
       if (value === "") return;
@@ -3618,23 +4177,23 @@ window.__ModuleLoader__.load({
       setBusy(false);
       if (result !== null) showToast(`${result.created} 件事 · ${result.projects} 个项目`);
     };
-    return import_react6.default.createElement(
+    return import_react7.default.createElement(
       "div",
       { className: "lpm-view" },
-      import_react6.default.createElement(
+      import_react7.default.createElement(
         "div",
         { className: "lpm-hero" },
-        import_react6.default.createElement("div", { className: "lpm-eyebrow" }, import_react6.default.createElement("span", { className: "lpm-dot" }), "从这一句开始"),
-        import_react6.default.createElement("h1", null, "把脑子里的东西，", import_react6.default.createElement("br"), "先倒出来。"),
-        import_react6.default.createElement(
+        import_react7.default.createElement("div", { className: "lpm-eyebrow" }, import_react7.default.createElement("span", { className: "lpm-dot" }), "从这一句开始"),
+        import_react7.default.createElement("h1", null, "把脑子里的东西，", import_react7.default.createElement("br"), "先倒出来。"),
+        import_react7.default.createElement(
           "p",
           null,
           "你和 TA 的人生正在同时发生很多事：想试的、必须办的、还没想清楚的。先不用分类——写下来，收进收件箱，再一起决定这个季度真正要押注的是什么。"
         ),
-        import_react6.default.createElement(
+        import_react7.default.createElement(
           "div",
           { style: { display: "flex", gap: 10, width: "100%", maxWidth: 560 } },
-          import_react6.default.createElement("input", {
+          import_react7.default.createElement("input", {
             ref: inputRef,
             className: "lpm-input",
             style: { height: 40, fontSize: 13.5 },
@@ -3650,28 +4209,28 @@ window.__ModuleLoader__.load({
             },
             "aria-label": "记下第一件事"
           }),
-          import_react6.default.createElement(Button, { variant: "accent", size: "lg", icon: "plus", disabled: busy || text.trim() === "", onClick: () => void submit() }, "收下")
+          import_react7.default.createElement(Button, { variant: "accent", size: "lg", icon: "plus", disabled: busy || text.trim() === "", onClick: () => void submit() }, "收下")
         ),
-        import_react6.default.createElement(
+        import_react7.default.createElement(
           "div",
           { className: "lpm-hero-syntax" },
-          import_react6.default.createElement("span", null, "快捷语法："),
-          import_react6.default.createElement("code", null, "#项目"),
-          import_react6.default.createElement("code", null, "@我"),
-          import_react6.default.createElement("code", null, "!p1"),
-          import_react6.default.createElement("code", null, "due:周五")
+          import_react7.default.createElement("span", null, "快捷语法："),
+          import_react7.default.createElement("code", null, "#项目"),
+          import_react7.default.createElement("code", null, "@我"),
+          import_react7.default.createElement("code", null, "!p1"),
+          import_react7.default.createElement("code", null, "due:周五")
         ),
-        import_react6.default.createElement(
+        import_react7.default.createElement(
           "div",
           { className: "lpm-hero-row" },
-          import_react6.default.createElement(Button, { variant: "quiet", icon: "sparkle", disabled: busy, onClick: () => void loadDemo() }, "先看看示例长什么样"),
-          import_react6.default.createElement(Button, { variant: "ghost", icon: "link", onClick: () => goTo("settings") }, "接入微信 / 飞书 / Telegram")
+          import_react7.default.createElement(Button, { variant: "quiet", icon: "sparkle", disabled: busy, onClick: () => void loadDemo() }, "先看看示例长什么样"),
+          import_react7.default.createElement(Button, { variant: "ghost", icon: "link", onClick: () => goTo("settings") }, "接入微信 / 飞书 / Telegram")
         ),
-        import_react6.default.createElement(
+        import_react7.default.createElement(
           "p",
           { className: "lpm-help" },
           "数据会以 Markdown 存在 ",
-          import_react6.default.createElement("span", { className: "lpm-mono" }, data.dataDir),
+          import_react7.default.createElement("span", { className: "lpm-mono" }, data.dataDir),
           "，你随时可以直接改文件，或者放进 git。"
         )
       )
@@ -3679,7 +4238,7 @@ window.__ModuleLoader__.load({
   }
 
   // plugin/src/client/drawer.jsx
-  var import_react7 = __toESM(require("react"), 1);
+  var import_react8 = __toESM(require("react"), 1);
   var STATUS_OPTIONS = ["inbox", "now", "next", "waiting", "someday", "done"].map((value) => ({
     value,
     label: STATUS_LABELS[value],
@@ -3693,18 +4252,18 @@ window.__ModuleLoader__.load({
   ];
   function TaskDrawer({ task, onClose }) {
     const { data, act, showToast } = usePM();
-    const [draft, setDraft] = (0, import_react7.useState)(() => toDraft(task));
-    const [saving, setSaving] = (0, import_react7.useState)(false);
-    const [confirmDelete, setConfirmDelete] = (0, import_react7.useState)(false);
-    const [titleFocused, setTitleFocused] = (0, import_react7.useState)(false);
-    const titleRef = (0, import_react7.useRef)(null);
-    const bodyRef = (0, import_react7.useRef)(null);
-    (0, import_react7.useEffect)(() => {
+    const [draft, setDraft] = (0, import_react8.useState)(() => toDraft(task));
+    const [saving, setSaving] = (0, import_react8.useState)(false);
+    const [confirmDelete, setConfirmDelete] = (0, import_react8.useState)(false);
+    const [titleFocused, setTitleFocused] = (0, import_react8.useState)(false);
+    const titleRef = (0, import_react8.useRef)(null);
+    const bodyRef = (0, import_react8.useRef)(null);
+    (0, import_react8.useEffect)(() => {
       setDraft(toDraft(task));
       setConfirmDelete(false);
       if (titleRef.current !== null) titleRef.current.style.height = "0px";
     }, [task.id]);
-    (0, import_react7.useEffect)(() => {
+    (0, import_react8.useEffect)(() => {
       const onKey = (event) => {
         if (event.key === "Escape") onClose();
         if ((event.metaKey || event.ctrlKey) && event.key === "Enter") {
@@ -3715,12 +4274,12 @@ window.__ModuleLoader__.load({
       window.addEventListener("keydown", onKey);
       return () => window.removeEventListener("keydown", onKey);
     });
-    (0, import_react7.useEffect)(() => {
+    (0, import_react8.useEffect)(() => {
       if (titleRef.current === null) return;
       titleRef.current.style.height = "0px";
       titleRef.current.style.height = `${titleRef.current.scrollHeight}px`;
     }, [draft.title, titleFocused]);
-    const baseline = (0, import_react7.useMemo)(() => toDraft(task), [task]);
+    const baseline = (0, import_react8.useMemo)(() => toDraft(task), [task]);
     const dirty = JSON.stringify(baseline) !== JSON.stringify(draft);
     const update = (patch) => setDraft((current) => ({ ...current, ...patch }));
     const save = async () => {
@@ -3753,28 +4312,28 @@ window.__ModuleLoader__.load({
     const openProjectModal = () => {
       showToast("先在「项目」页新建项目，再回来关联", "error");
     };
-    return import_react7.default.createElement(
-      import_react7.default.Fragment,
+    return import_react8.default.createElement(
+      import_react8.default.Fragment,
       null,
-      import_react7.default.createElement("div", { className: "lpm-drawer-backdrop", onClick: onClose }),
-      import_react7.default.createElement(
+      import_react8.default.createElement("div", { className: "lpm-drawer-backdrop", onClick: onClose }),
+      import_react8.default.createElement(
         "aside",
         { className: "lpm-drawer", role: "dialog", "aria-modal": "true", "aria-label": "事项详情" },
-        import_react7.default.createElement(
+        import_react8.default.createElement(
           "header",
           { className: "lpm-drawer-head" },
-          import_react7.default.createElement("h2", null, "事项"),
-          import_react7.default.createElement(
+          import_react8.default.createElement("h2", null, "事项"),
+          import_react8.default.createElement(
             "div",
             { style: { display: "flex", alignItems: "center", gap: 4 } },
-            dirty ? import_react7.default.createElement("span", { className: "lpm-muted", style: { fontSize: 10.5, marginRight: 4 } }, "未保存") : null,
-            import_react7.default.createElement(IconButton, { icon: "close", label: "关闭", onClick: onClose })
+            dirty ? import_react8.default.createElement("span", { className: "lpm-muted", style: { fontSize: 10.5, marginRight: 4 } }, "未保存") : null,
+            import_react8.default.createElement(IconButton, { icon: "close", label: "关闭", onClick: onClose })
           )
         ),
-        import_react7.default.createElement(
+        import_react8.default.createElement(
           "div",
           { className: "lpm-drawer-body", ref: bodyRef },
-          import_react7.default.createElement("textarea", {
+          import_react8.default.createElement("textarea", {
             ref: titleRef,
             className: "lpm-title-input",
             rows: 1,
@@ -3784,36 +4343,36 @@ window.__ModuleLoader__.load({
             onBlur: () => setTitleFocused(false),
             "aria-label": "标题"
           }),
-          import_react7.default.createElement(
+          import_react8.default.createElement(
             Field,
             { label: "状态" },
-            import_react7.default.createElement(Segmented, {
+            import_react8.default.createElement(Segmented, {
               value: draft.status,
               options: STATUS_OPTIONS,
               onChange: (value) => update({ status: value }),
               ariaLabel: "状态"
             })
           ),
-          import_react7.default.createElement(
+          import_react8.default.createElement(
             Field,
             { label: "谁负责" },
-            import_react7.default.createElement(Segmented, {
+            import_react8.default.createElement(Segmented, {
               value: draft.owner ?? "none",
               options: OWNER_OPTIONS,
               onChange: (value) => update({ owner: value === "none" ? null : value }),
               ariaLabel: "负责人"
             })
           ),
-          import_react7.default.createElement(
+          import_react8.default.createElement(
             "div",
             { className: "lpm-grid-2" },
-            import_react7.default.createElement(
+            import_react8.default.createElement(
               Field,
               { label: "项目" },
-              import_react7.default.createElement(
+              import_react8.default.createElement(
                 "div",
                 { className: "lpm-row", style: { gap: 4 } },
-                import_react7.default.createElement(
+                import_react8.default.createElement(
                   "select",
                   {
                     className: "lpm-select",
@@ -3821,17 +4380,17 @@ window.__ModuleLoader__.load({
                     onChange: (event) => update({ project: event.target.value }),
                     "aria-label": "项目"
                   },
-                  import_react7.default.createElement("option", { value: "" }, "未归属"),
-                  data.projects.map((project) => import_react7.default.createElement("option", { key: project.id, value: project.id }, project.name)),
-                  draft.project !== "" && !data.projects.some((project) => project.id === draft.project) ? import_react7.default.createElement("option", { value: draft.project }, draft.project) : null
+                  import_react8.default.createElement("option", { value: "" }, "未归属"),
+                  data.projects.map((project) => import_react8.default.createElement("option", { key: project.id, value: project.id }, project.name)),
+                  draft.project !== "" && !data.projects.some((project) => project.id === draft.project) ? import_react8.default.createElement("option", { value: draft.project }, draft.project) : null
                 ),
-                import_react7.default.createElement(IconButton, { icon: "plus", label: "新建项目", onClick: openProjectModal })
+                import_react8.default.createElement(IconButton, { icon: "plus", label: "新建项目", onClick: openProjectModal })
               )
             ),
-            import_react7.default.createElement(
+            import_react8.default.createElement(
               Field,
               { label: "领域" },
-              import_react7.default.createElement(
+              import_react8.default.createElement(
                 "select",
                 {
                   className: "lpm-select",
@@ -3839,18 +4398,18 @@ window.__ModuleLoader__.load({
                   onChange: (event) => update({ area: event.target.value }),
                   "aria-label": "领域"
                 },
-                import_react7.default.createElement("option", { value: "" }, "未归类"),
-                data.meta.areas.map((area) => import_react7.default.createElement("option", { key: area.id, value: area.id }, area.name))
+                import_react8.default.createElement("option", { value: "" }, "未归类"),
+                data.meta.areas.map((area) => import_react8.default.createElement("option", { key: area.id, value: area.id }, area.name))
               )
             )
           ),
-          import_react7.default.createElement(
+          import_react8.default.createElement(
             "div",
             { className: "lpm-grid-2" },
-            import_react7.default.createElement(
+            import_react8.default.createElement(
               Field,
               { label: "优先级" },
-              import_react7.default.createElement(
+              import_react8.default.createElement(
                 "select",
                 {
                   className: "lpm-select",
@@ -3858,14 +4417,14 @@ window.__ModuleLoader__.load({
                   onChange: (event) => update({ priority: event.target.value }),
                   "aria-label": "优先级"
                 },
-                import_react7.default.createElement("option", { value: "" }, "未定"),
-                ["p0", "p1", "p2", "p3"].map((value) => import_react7.default.createElement("option", { key: value, value }, `${value} · ${PRIORITY_LABELS[value]}`))
+                import_react8.default.createElement("option", { value: "" }, "未定"),
+                ["p0", "p1", "p2", "p3"].map((value) => import_react8.default.createElement("option", { key: value, value }, `${value} · ${PRIORITY_LABELS[value]}`))
               )
             ),
-            import_react7.default.createElement(
+            import_react8.default.createElement(
               Field,
               { label: "截止日" },
-              import_react7.default.createElement("input", {
+              import_react8.default.createElement("input", {
                 className: "lpm-input",
                 type: "date",
                 value: draft.due,
@@ -3874,64 +4433,64 @@ window.__ModuleLoader__.load({
               })
             )
           ),
-          import_react7.default.createElement(
+          import_react8.default.createElement(
             "div",
             { className: "lpm-row" },
-            import_react7.default.createElement(Button, { size: "sm", variant: "quiet", onClick: () => update({ due: todayISO2() }) }, "今天"),
-            import_react7.default.createElement(Button, { size: "sm", variant: "quiet", onClick: () => update({ due: shiftDate(1) }) }, "明天"),
-            import_react7.default.createElement(Button, { size: "sm", variant: "quiet", onClick: () => update({ due: shiftDate(7) }) }, "下周"),
-            import_react7.default.createElement("span", { style: { flex: "1 1 auto" } }),
-            draft.due !== "" ? import_react7.default.createElement(Button, { size: "sm", variant: "ghost", onClick: () => update({ due: "" }) }, "清除日期") : null
+            import_react8.default.createElement(Button, { size: "sm", variant: "quiet", onClick: () => update({ due: todayISO2() }) }, "今天"),
+            import_react8.default.createElement(Button, { size: "sm", variant: "quiet", onClick: () => update({ due: shiftDate(1) }) }, "明天"),
+            import_react8.default.createElement(Button, { size: "sm", variant: "quiet", onClick: () => update({ due: shiftDate(7) }) }, "下周"),
+            import_react8.default.createElement("span", { style: { flex: "1 1 auto" } }),
+            draft.due !== "" ? import_react8.default.createElement(Button, { size: "sm", variant: "ghost", onClick: () => update({ due: "" }) }, "清除日期") : null
           ),
-          import_react7.default.createElement(
+          import_react8.default.createElement(
             "div",
             { className: "lpm-toggle-row" },
-            import_react7.default.createElement("span", null, "放进「本周想做」"),
-            import_react7.default.createElement(Toggle, {
+            import_react8.default.createElement("span", null, "放进「本周想做」"),
+            import_react8.default.createElement(Toggle, {
               checked: draft.focus,
               onChange: (value) => update({ focus: value }),
               label: "加入本周想做"
             })
           ),
-          draft.status === "waiting" ? import_react7.default.createElement(
+          draft.status === "waiting" ? import_react8.default.createElement(
             Field,
             { label: "在等什么", hint: "人 / 条件 / 回复" },
-            import_react7.default.createElement("input", {
+            import_react8.default.createElement("input", {
               className: "lpm-input",
               value: draft.waitingOn,
               placeholder: "例如：等对方回复、等预算批下来",
               onChange: (event) => update({ waitingOn: event.target.value })
             })
           ) : null,
-          import_react7.default.createElement(
+          import_react8.default.createElement(
             Field,
             { label: "笔记", hint: "Markdown 正文" },
-            import_react7.default.createElement("textarea", {
+            import_react8.default.createElement("textarea", {
               className: "lpm-textarea",
               value: draft.notes,
               placeholder: "为什么做、卡在哪、和谁聊过…",
               onChange: (event) => update({ notes: event.target.value })
             })
           ),
-          import_react7.default.createElement(
+          import_react8.default.createElement(
             "div",
             { className: "lpm-drawer-meta" },
-            import_react7.default.createElement("span", null, `创建 ${formatStamp(task.created) || "—"}`),
-            import_react7.default.createElement("span", null, `更新 ${formatStamp(task.updated) || "—"}`),
-            import_react7.default.createElement("span", { className: "lpm-mono" }, task.file)
+            import_react8.default.createElement("span", null, `创建 ${formatStamp(task.created) || "—"}`),
+            import_react8.default.createElement("span", null, `更新 ${formatStamp(task.updated) || "—"}`),
+            import_react8.default.createElement("span", { className: "lpm-mono" }, task.file)
           )
         ),
-        import_react7.default.createElement(
+        import_react8.default.createElement(
           "footer",
           { className: "lpm-drawer-foot" },
-          import_react7.default.createElement(Button, {
+          import_react8.default.createElement(Button, {
             variant: confirmDelete ? "danger" : "ghost",
             size: "sm",
             icon: "trash",
             onClick: () => void remove()
           }, confirmDelete ? "确认删除？" : "删除"),
-          import_react7.default.createElement("span", { style: { flex: "1 1 auto" } }),
-          import_react7.default.createElement(Button, {
+          import_react8.default.createElement("span", { style: { flex: "1 1 auto" } }),
+          import_react8.default.createElement(Button, {
             size: "sm",
             variant: "ghost",
             icon: task.status === "done" ? "refresh" : "check",
@@ -3939,7 +4498,7 @@ window.__ModuleLoader__.load({
               if (result !== null) onClose();
             })
           }, task.status === "done" ? "重新打开" : "完成"),
-          import_react7.default.createElement(Button, { size: "sm", variant: "primary", disabled: !dirty || saving, onClick: () => void save() }, saving ? "保存中…" : "保存")
+          import_react8.default.createElement(Button, { size: "sm", variant: "primary", disabled: !dirty || saving, onClick: () => void save() }, saving ? "保存中…" : "保存")
         )
       )
     );
@@ -3971,13 +4530,13 @@ window.__ModuleLoader__.load({
   }
 
   // plugin/src/client/journal.jsx
-  var import_react8 = __toESM(require("react"), 1);
+  var import_react9 = __toESM(require("react"), 1);
   var KIND_OPTIONS = ["note", "decision", "win", "worry"].map((value) => ({ value, label: KIND_LABELS[value] }));
   function JournalView() {
     const { data, act, goTo } = usePM();
-    const [text, setText] = (0, import_react8.useState)("");
-    const [kind, setKind] = (0, import_react8.useState)("note");
-    const [saving, setSaving] = (0, import_react8.useState)(false);
+    const [text, setText] = (0, import_react9.useState)("");
+    const [kind, setKind] = (0, import_react9.useState)("note");
+    const [saving, setSaving] = (0, import_react9.useState)(false);
     const submit = async () => {
       const value = text.trim();
       if (value === "") return;
@@ -3988,29 +4547,29 @@ window.__ModuleLoader__.load({
     };
     const latestReview = data.reviews[0];
     const days = data.journal;
-    return import_react8.default.createElement(
+    return import_react9.default.createElement(
       "div",
       { className: "lpm-view" },
-      import_react8.default.createElement(
+      import_react9.default.createElement(
         "div",
         { className: "lpm-journal-layout" },
-        import_react8.default.createElement(
+        import_react9.default.createElement(
           "div",
           null,
-          import_react8.default.createElement(
+          import_react9.default.createElement(
             "div",
             { className: "lpm-section-head" },
-            import_react8.default.createElement(
+            import_react9.default.createElement(
               "div",
               null,
-              import_react8.default.createElement("h2", null, "日记与决定"),
-              import_react8.default.createElement("p", null, "不用写得好看。写下来，是为了让未来的你们记得当时为什么这么选。")
+              import_react9.default.createElement("h2", null, "日记与决定"),
+              import_react9.default.createElement("p", null, "不用写得好看。写下来，是为了让未来的你们记得当时为什么这么选。")
             )
           ),
-          import_react8.default.createElement(
+          import_react9.default.createElement(
             "div",
             { className: "lpm-composer" },
-            import_react8.default.createElement("textarea", {
+            import_react9.default.createElement("textarea", {
               value: text,
               placeholder: "今天发生了什么？卡在哪？想清楚了什么？",
               onChange: (event) => setText(event.target.value),
@@ -4022,11 +4581,11 @@ window.__ModuleLoader__.load({
               },
               "aria-label": "今天的记录"
             }),
-            import_react8.default.createElement(
+            import_react9.default.createElement(
               "div",
               { className: "lpm-composer-foot" },
-              import_react8.default.createElement(Segmented, { value: kind, options: KIND_OPTIONS, onChange: setKind, ariaLabel: "记录类型" }),
-              import_react8.default.createElement(Button, {
+              import_react9.default.createElement(Segmented, { value: kind, options: KIND_OPTIONS, onChange: setKind, ariaLabel: "记录类型" }),
+              import_react9.default.createElement(Button, {
                 variant: "primary",
                 size: "sm",
                 disabled: saving || text.trim() === "",
@@ -4034,60 +4593,60 @@ window.__ModuleLoader__.load({
               }, saving ? "记录中…" : "记下")
             )
           ),
-          days.length === 0 ? import_react8.default.createElement(
+          days.length === 0 ? import_react9.default.createElement(
             "div",
             { className: "lpm-empty", style: { padding: "40px 0" } },
-            import_react8.default.createElement("p", null, "还没有记录。今天写一句就够。")
-          ) : import_react8.default.createElement("div", null, days.map((day) => import_react8.default.createElement(
+            import_react9.default.createElement("p", null, "还没有记录。今天写一句就够。")
+          ) : import_react9.default.createElement("div", null, days.map((day) => import_react9.default.createElement(
             "section",
             {
               key: day.date,
               className: `lpm-day ${day.date === data.today ? "is-today" : ""}`.trim()
             },
-            import_react8.default.createElement("h3", null, `${formatDateLong(day.date)}${day.date === data.today ? " · 今天" : ""}`),
-            day.entries.map((entry, index) => import_react8.default.createElement(
+            import_react9.default.createElement("h3", null, `${formatDateLong(day.date)}${day.date === data.today ? " · 今天" : ""}`),
+            day.entries.map((entry, index) => import_react9.default.createElement(
               "article",
               { key: `${entry.time}-${index}`, className: "lpm-entry" },
-              import_react8.default.createElement(
+              import_react9.default.createElement(
                 "div",
                 { className: "lpm-entry-head" },
-                import_react8.default.createElement("span", { className: "lpm-kind", "data-kind": entry.kind }, KIND_LABELS[entry.kind] ?? entry.kind),
-                import_react8.default.createElement("span", null, entry.time)
+                import_react9.default.createElement("span", { className: "lpm-kind", "data-kind": entry.kind }, KIND_LABELS[entry.kind] ?? entry.kind),
+                import_react9.default.createElement("span", null, entry.time)
               ),
-              import_react8.default.createElement("p", null, entry.text)
+              import_react9.default.createElement("p", null, entry.text)
             ))
           )))
         ),
-        import_react8.default.createElement(
+        import_react9.default.createElement(
           "aside",
           null,
-          import_react8.default.createElement(
+          import_react9.default.createElement(
             "div",
             { className: "lpm-aside-card" },
-            import_react8.default.createElement("h3", null, "这一周"),
-            import_react8.default.createElement(
+            import_react9.default.createElement("h3", null, "这一周"),
+            import_react9.default.createElement(
               "div",
               { className: "lpm-aside-stats" },
-              import_react8.default.createElement("div", null, import_react8.default.createElement("b", null, data.stats.doneThisWeek), import_react8.default.createElement("span", null, "完成")),
-              import_react8.default.createElement("div", null, import_react8.default.createElement("b", null, data.stats.now), import_react8.default.createElement("span", null, "现在")),
-              import_react8.default.createElement("div", null, import_react8.default.createElement("b", null, data.stats.waiting), import_react8.default.createElement("span", null, "等待")),
-              import_react8.default.createElement("div", null, import_react8.default.createElement("b", null, data.stats.inbox + data.stats.inboxTasks), import_react8.default.createElement("span", null, "收件箱"))
+              import_react9.default.createElement("div", null, import_react9.default.createElement("b", null, data.stats.doneThisWeek), import_react9.default.createElement("span", null, "完成")),
+              import_react9.default.createElement("div", null, import_react9.default.createElement("b", null, data.stats.now), import_react9.default.createElement("span", null, "现在")),
+              import_react9.default.createElement("div", null, import_react9.default.createElement("b", null, data.stats.waiting), import_react9.default.createElement("span", null, "等待")),
+              import_react9.default.createElement("div", null, import_react9.default.createElement("b", null, data.stats.inbox + data.stats.inboxTasks), import_react9.default.createElement("span", null, "收件箱"))
             )
           ),
-          import_react8.default.createElement(
+          import_react9.default.createElement(
             "div",
             { className: "lpm-aside-card" },
-            import_react8.default.createElement("h3", null, "本周复盘"),
-            latestReview !== void 0 ? import_react8.default.createElement(
-              import_react8.default.Fragment,
+            import_react9.default.createElement("h3", null, "本周复盘"),
+            latestReview !== void 0 ? import_react9.default.createElement(
+              import_react9.default.Fragment,
               null,
-              import_react8.default.createElement("p", { className: "lpm-muted" }, `已生成 ${latestReview.week}`),
-              import_react8.default.createElement(Button, { size: "sm", variant: "quiet", icon: "book", onClick: () => goTo("review") }, "打开复盘")
-            ) : import_react8.default.createElement(
-              import_react8.default.Fragment,
+              import_react9.default.createElement("p", { className: "lpm-muted" }, `已生成 ${latestReview.week}`),
+              import_react9.default.createElement(Button, { size: "sm", variant: "quiet", icon: "book", onClick: () => goTo("review") }, "打开复盘")
+            ) : import_react9.default.createElement(
+              import_react9.default.Fragment,
               null,
-              import_react8.default.createElement("p", null, "还没有本周复盘。生成一份，再在里面写「我的复盘」。"),
-              import_react8.default.createElement(Button, { size: "sm", variant: "quiet", icon: "sparkle", onClick: () => goTo("review") }, "去生成")
+              import_react9.default.createElement("p", null, "还没有本周复盘。生成一份，再在里面写「我的复盘」。"),
+              import_react9.default.createElement(Button, { size: "sm", variant: "quiet", icon: "sparkle", onClick: () => goTo("review") }, "去生成")
             )
           )
         )
@@ -4096,17 +4655,17 @@ window.__ModuleLoader__.load({
   }
   function ReviewView() {
     const { data, act } = usePM();
-    const weeks = (0, import_react8.useMemo)(() => {
+    const weeks = (0, import_react9.useMemo)(() => {
       const known = new Set(data.reviews.map((review2) => review2.week));
       known.add(data.week);
       return [...known].sort().reverse();
     }, [data.reviews, data.week]);
-    const [week, setWeek] = (0, import_react8.useState)(data.reviews[0]?.week ?? data.week);
-    const [editing, setEditing] = (0, import_react8.useState)(false);
-    const [draft, setDraft] = (0, import_react8.useState)("");
-    const [busy, setBusy] = (0, import_react8.useState)(false);
+    const [week, setWeek] = (0, import_react9.useState)(data.reviews[0]?.week ?? data.week);
+    const [editing, setEditing] = (0, import_react9.useState)(false);
+    const [draft, setDraft] = (0, import_react9.useState)("");
+    const [busy, setBusy] = (0, import_react9.useState)(false);
     const review = data.reviews.find((item) => item.week === week);
-    (0, import_react8.useEffect)(() => {
+    (0, import_react9.useEffect)(() => {
       setEditing(false);
       setDraft(review?.body ?? "");
     }, [week, review?.body]);
@@ -4122,23 +4681,23 @@ window.__ModuleLoader__.load({
       setBusy(false);
       if (result !== null) setEditing(false);
     };
-    return import_react8.default.createElement(
+    return import_react9.default.createElement(
       "div",
       { className: "lpm-view" },
-      import_react8.default.createElement(
+      import_react9.default.createElement(
         "div",
         { className: "lpm-section-head" },
-        import_react8.default.createElement(
+        import_react9.default.createElement(
           "div",
           null,
-          import_react8.default.createElement("h2", null, "每周复盘"),
-          import_react8.default.createElement("p", null, "看本周真正完成了什么、卡在哪、哪些项目三周没动了。")
+          import_react9.default.createElement("h2", null, "每周复盘"),
+          import_react9.default.createElement("p", null, "看本周真正完成了什么、卡在哪、哪些项目三周没动了。")
         ),
-        import_react8.default.createElement(
+        import_react9.default.createElement(
           "div",
           { style: { display: "flex", gap: 8 } },
-          import_react8.default.createElement(Button, { variant: "quiet", size: "sm", icon: "sparkle", disabled: busy, onClick: () => void generate() }, busy ? "生成中…" : review === void 0 ? "生成本周复盘" : "重新生成"),
-          review === void 0 ? null : import_react8.default.createElement(Button, {
+          import_react9.default.createElement(Button, { variant: "quiet", size: "sm", icon: "sparkle", disabled: busy, onClick: () => void generate() }, busy ? "生成中…" : review === void 0 ? "生成本周复盘" : "重新生成"),
+          review === void 0 ? null : import_react9.default.createElement(Button, {
             variant: "quiet",
             size: "sm",
             icon: editing ? "check" : "book",
@@ -4146,28 +4705,28 @@ window.__ModuleLoader__.load({
           }, editing ? "保存" : "编辑")
         )
       ),
-      import_react8.default.createElement(
+      import_react9.default.createElement(
         "div",
         { className: "lpm-weekchips" },
-        weeks.map((item) => import_react8.default.createElement("button", {
+        weeks.map((item) => import_react9.default.createElement("button", {
           key: item,
           type: "button",
           className: `lpm-weekchip ${item === week ? "is-active" : ""}`.trim(),
           onClick: () => setWeek(item)
         }, item)),
-        review === void 0 ? null : import_react8.default.createElement("span", { className: "lpm-muted", style: { fontSize: 11, alignSelf: "center" } }, `更新于 ${formatStamp(review.createdAt) || "—"}`)
+        review === void 0 ? null : import_react9.default.createElement("span", { className: "lpm-muted", style: { fontSize: 11, alignSelf: "center" } }, `更新于 ${formatStamp(review.createdAt) || "—"}`)
       ),
-      review === void 0 ? import_react8.default.createElement(
+      review === void 0 ? import_react9.default.createElement(
         "div",
         { className: "lpm-empty" },
-        import_react8.default.createElement("h2", null, "这一周还没有复盘"),
-        import_react8.default.createElement("p", null, "生成之后，它会包含完成、阻塞、停滞项目和「下周只做三件」。你可以直接在里面写。"),
-        import_react8.default.createElement(Button, { variant: "quiet", icon: "sparkle", disabled: busy, onClick: () => void generate() }, "生成")
-      ) : editing ? import_react8.default.createElement("textarea", {
+        import_react9.default.createElement("h2", null, "这一周还没有复盘"),
+        import_react9.default.createElement("p", null, "生成之后，它会包含完成、阻塞、停滞项目和「下周只做三件」。你可以直接在里面写。"),
+        import_react9.default.createElement(Button, { variant: "quiet", icon: "sparkle", disabled: busy, onClick: () => void generate() }, "生成")
+      ) : editing ? import_react9.default.createElement("textarea", {
         className: "lpm-review-edit",
         value: draft,
         onChange: (event) => setDraft(event.target.value)
-      }) : import_react8.default.createElement("div", { className: "lpm-review-text" }, renderMarkdown(review.body))
+      }) : import_react9.default.createElement("div", { className: "lpm-review-text" }, renderMarkdown(review.body))
     );
   }
   function renderMarkdown(source) {
@@ -4178,7 +4737,7 @@ window.__ModuleLoader__.load({
     const flushList = () => {
       if (list.length === 0) return;
       const tag = ordered ? "ol" : "ul";
-      blocks.push(import_react8.default.createElement(tag, { key: `l-${blocks.length}`, className: ordered ? "lpm-ol" : void 0 }, list.map((item, index) => import_react8.default.createElement("li", { key: index }, inline(item)))));
+      blocks.push(import_react9.default.createElement(tag, { key: `l-${blocks.length}`, className: ordered ? "lpm-ol" : void 0 }, list.map((item, index) => import_react9.default.createElement("li", { key: index }, inline(item)))));
       list = [];
     };
     for (const raw of lines) {
@@ -4191,12 +4750,12 @@ window.__ModuleLoader__.load({
       if (heading !== null) {
         flushList();
         const level = heading[1].length;
-        blocks.push(import_react8.default.createElement(`h${Math.min(4, level + 1)}`, { key: `h-${blocks.length}` }, inline(heading[2])));
+        blocks.push(import_react9.default.createElement(`h${Math.min(4, level + 1)}`, { key: `h-${blocks.length}` }, inline(heading[2])));
         continue;
       }
       if (line.startsWith("> ")) {
         flushList();
-        blocks.push(import_react8.default.createElement("blockquote", { key: `q-${blocks.length}` }, inline(line.slice(2))));
+        blocks.push(import_react9.default.createElement("blockquote", { key: `q-${blocks.length}` }, inline(line.slice(2))));
         continue;
       }
       const bullet = /^[-*]\s+(.*)$/.exec(line);
@@ -4214,7 +4773,7 @@ window.__ModuleLoader__.load({
         continue;
       }
       flushList();
-      blocks.push(import_react8.default.createElement("p", { key: `p-${blocks.length}` }, inline(line)));
+      blocks.push(import_react9.default.createElement("p", { key: `p-${blocks.length}` }, inline(line)));
     }
     flushList();
     return blocks;
@@ -4222,19 +4781,19 @@ window.__ModuleLoader__.load({
   function inline(text) {
     const parts = String(text).split(/(\*\*[^*]+\*\*|`[^`]+`)/g).filter((part) => part !== "");
     return parts.map((part, index) => {
-      if (part.startsWith("**") && part.endsWith("**")) return import_react8.default.createElement("strong", { key: index }, part.slice(2, -2));
-      if (part.startsWith("`") && part.endsWith("`")) return import_react8.default.createElement("code", { key: index }, part.slice(1, -1));
-      return import_react8.default.createElement("span", { key: index }, part);
+      if (part.startsWith("**") && part.endsWith("**")) return import_react9.default.createElement("strong", { key: index }, part.slice(2, -2));
+      if (part.startsWith("`") && part.endsWith("`")) return import_react9.default.createElement("code", { key: index }, part.slice(1, -1));
+      return import_react9.default.createElement("span", { key: index }, part);
     });
   }
 
   // plugin/src/client/settings.jsx
-  var import_react9 = __toESM(require("react"), 1);
+  var import_react10 = __toESM(require("react"), 1);
   function SettingsView() {
     const { data, act, showToast } = usePM();
-    const [meta, setMeta] = (0, import_react9.useState)(() => toMetaDraft(data.meta));
-    const [saving, setSaving] = (0, import_react9.useState)(false);
-    (0, import_react9.useEffect)(() => {
+    const [meta, setMeta] = (0, import_react10.useState)(() => toMetaDraft(data.meta));
+    const [saving, setSaving] = (0, import_react10.useState)(false);
+    (0, import_react10.useEffect)(() => {
       setMeta(toMetaDraft(data.meta));
     }, [data.meta]);
     const save = async (patch, message) => {
@@ -4247,9 +4806,9 @@ window.__ModuleLoader__.load({
       const result = await act(() => api.testChannel(input));
       if (result !== null) showToast(result.detail ?? (result.ok ? "已发送" : "发送失败"), result.ok ? "info" : "error");
     };
-    const ingestUrl = (0, import_react9.useMemo)(() => `${window.location.origin}/lifepm/inbox`, []);
+    const ingestUrl = (0, import_react10.useMemo)(() => `${window.location.origin}/lifepm/inbox`, []);
     const token = meta.connectors.token;
-    return /* @__PURE__ */ import_react9.default.createElement("div", { className: "lpm-view" }, /* @__PURE__ */ import_react9.default.createElement("div", { className: "lpm-settings" }, /* @__PURE__ */ import_react9.default.createElement(SeasonSection, { meta, setMeta, saving, save }), /* @__PURE__ */ import_react9.default.createElement(
+    return /* @__PURE__ */ import_react10.default.createElement("div", { className: "lpm-view" }, /* @__PURE__ */ import_react10.default.createElement("div", { className: "lpm-settings" }, /* @__PURE__ */ import_react10.default.createElement(SeasonSection, { meta, setMeta, saving, save }), /* @__PURE__ */ import_react10.default.createElement(
       ConnectorsSection,
       {
         meta,
@@ -4261,10 +4820,10 @@ window.__ModuleLoader__.load({
         ingestUrl,
         token
       }
-    ), /* @__PURE__ */ import_react9.default.createElement(DataSection, { data, act, showToast })));
+    ), /* @__PURE__ */ import_react10.default.createElement(DataSection, { data, act, showToast })));
   }
   function SeasonSection({ meta, setMeta, saving, save }) {
-    return /* @__PURE__ */ import_react9.default.createElement("section", { className: "lpm-section" }, /* @__PURE__ */ import_react9.default.createElement("header", null, /* @__PURE__ */ import_react9.default.createElement("div", null, /* @__PURE__ */ import_react9.default.createElement("h2", null, "这一季"), /* @__PURE__ */ import_react9.default.createElement("p", null, "一个季度只押一个赌注。它会出现在看板最上面，也会成为复盘的对照。")), /* @__PURE__ */ import_react9.default.createElement(Button, { size: "sm", variant: "quiet", disabled: saving, onClick: () => void save({ focus: meta.focus, bet: meta.bet, quarter: meta.quarter }, "已保存") }, "保存")), /* @__PURE__ */ import_react9.default.createElement(Field, { label: "主线", hint: "一句话描述这一季的注意力" }, /* @__PURE__ */ import_react9.default.createElement(
+    return /* @__PURE__ */ import_react10.default.createElement("section", { className: "lpm-section" }, /* @__PURE__ */ import_react10.default.createElement("header", null, /* @__PURE__ */ import_react10.default.createElement("div", null, /* @__PURE__ */ import_react10.default.createElement("h2", null, "这一季"), /* @__PURE__ */ import_react10.default.createElement("p", null, "一个季度只押一个赌注。它会出现在看板最上面，也会成为复盘的对照。")), /* @__PURE__ */ import_react10.default.createElement(Button, { size: "sm", variant: "quiet", disabled: saving, onClick: () => void save({ focus: meta.focus, bet: meta.bet, quarter: meta.quarter }, "已保存") }, "保存")), /* @__PURE__ */ import_react10.default.createElement(Field, { label: "主线", hint: "一句话描述这一季的注意力" }, /* @__PURE__ */ import_react10.default.createElement(
       "input",
       {
         className: "lpm-input",
@@ -4272,7 +4831,7 @@ window.__ModuleLoader__.load({
         placeholder: "把生活安顿下来，再谈远方",
         onChange: (event) => setMeta({ ...meta, focus: event.target.value })
       }
-    )), /* @__PURE__ */ import_react9.default.createElement(Field, { label: "赌注", hint: "愿意为此排除其他事的那一件" }, /* @__PURE__ */ import_react9.default.createElement(
+    )), /* @__PURE__ */ import_react10.default.createElement(Field, { label: "赌注", hint: "愿意为此排除其他事的那一件" }, /* @__PURE__ */ import_react10.default.createElement(
       "input",
       {
         className: "lpm-input",
@@ -4280,7 +4839,7 @@ window.__ModuleLoader__.load({
         placeholder: "先落脚：定下城市和住处",
         onChange: (event) => setMeta({ ...meta, bet: event.target.value })
       }
-    )), /* @__PURE__ */ import_react9.default.createElement("div", { className: "lpm-grid-2" }, /* @__PURE__ */ import_react9.default.createElement(Field, { label: "季度" }, /* @__PURE__ */ import_react9.default.createElement(
+    )), /* @__PURE__ */ import_react10.default.createElement("div", { className: "lpm-grid-2" }, /* @__PURE__ */ import_react10.default.createElement(Field, { label: "季度" }, /* @__PURE__ */ import_react10.default.createElement(
       "input",
       {
         className: "lpm-input",
@@ -4288,7 +4847,7 @@ window.__ModuleLoader__.load({
         placeholder: "2026-Q4",
         onChange: (event) => setMeta({ ...meta, quarter: event.target.value })
       }
-    )), /* @__PURE__ */ import_react9.default.createElement(Field, { label: "我们俩的名字" }, /* @__PURE__ */ import_react9.default.createElement("div", { className: "lpm-row" }, /* @__PURE__ */ import_react9.default.createElement(
+    )), /* @__PURE__ */ import_react10.default.createElement(Field, { label: "我们俩的名字" }, /* @__PURE__ */ import_react10.default.createElement("div", { className: "lpm-row" }, /* @__PURE__ */ import_react10.default.createElement(
       "input",
       {
         className: "lpm-input",
@@ -4296,7 +4855,7 @@ window.__ModuleLoader__.load({
         "aria-label": "我的名字",
         onChange: (event) => setMeta({ ...meta, people: { ...meta.people, me: event.target.value } })
       }
-    ), /* @__PURE__ */ import_react9.default.createElement(
+    ), /* @__PURE__ */ import_react10.default.createElement(
       "input",
       {
         className: "lpm-input",
@@ -4304,7 +4863,7 @@ window.__ModuleLoader__.load({
         "aria-label": "TA 的名字",
         onChange: (event) => setMeta({ ...meta, people: { ...meta.people, partner: event.target.value } })
       }
-    )))), /* @__PURE__ */ import_react9.default.createElement(Field, { label: "生活领域", hint: "任务和项目会归到这些领域里" }, /* @__PURE__ */ import_react9.default.createElement("div", { className: "lpm-areas" }, meta.areas.map((area, index) => /* @__PURE__ */ import_react9.default.createElement("span", { key: `${area.id}-${index}`, className: "lpm-area-chip" }, /* @__PURE__ */ import_react9.default.createElement(
+    )))), /* @__PURE__ */ import_react10.default.createElement(Field, { label: "生活领域", hint: "任务和项目会归到这些领域里" }, /* @__PURE__ */ import_react10.default.createElement("div", { className: "lpm-areas" }, meta.areas.map((area, index) => /* @__PURE__ */ import_react10.default.createElement("span", { key: `${area.id}-${index}`, className: "lpm-area-chip" }, /* @__PURE__ */ import_react10.default.createElement(
       "input",
       {
         className: "lpm-input",
@@ -4317,7 +4876,7 @@ window.__ModuleLoader__.load({
           setMeta({ ...meta, areas });
         }
       }
-    ), /* @__PURE__ */ import_react9.default.createElement(
+    ), /* @__PURE__ */ import_react10.default.createElement(
       "button",
       {
         type: "button",
@@ -4325,7 +4884,7 @@ window.__ModuleLoader__.load({
         onClick: () => setMeta({ ...meta, areas: meta.areas.filter((_, position) => position !== index) })
       },
       "×"
-    ))), /* @__PURE__ */ import_react9.default.createElement(
+    ))), /* @__PURE__ */ import_react10.default.createElement(
       "button",
       {
         type: "button",
@@ -4333,7 +4892,7 @@ window.__ModuleLoader__.load({
         onClick: () => setMeta({ ...meta, areas: [...meta.areas, { id: `area-${meta.areas.length + 1}`, name: "新领域" }] })
       },
       "＋ 添加"
-    ))), /* @__PURE__ */ import_react9.default.createElement("div", { style: { display: "flex", justifyContent: "flex-end" } }, /* @__PURE__ */ import_react9.default.createElement(Button, { size: "sm", variant: "quiet", disabled: saving, onClick: () => void save({ people: meta.people, areas: meta.areas }, "已保存") }, "保存领域与名字")));
+    ))), /* @__PURE__ */ import_react10.default.createElement("div", { style: { display: "flex", justifyContent: "flex-end" } }, /* @__PURE__ */ import_react10.default.createElement(Button, { size: "sm", variant: "quiet", disabled: saving, onClick: () => void save({ people: meta.people, areas: meta.areas }, "已保存") }, "保存领域与名字")));
   }
   function ConnectorsSection({ meta, setMeta, data, saving, save, test, ingestUrl, token }) {
     const connectors = meta.connectors;
@@ -4341,7 +4900,7 @@ window.__ModuleLoader__.load({
     const status = data.connectors?.telegram;
     const setTelegram = (patch) => setMeta({ ...meta, connectors: { ...connectors, telegram: { ...telegram, ...patch } } });
     const setConnectors = (patch) => setMeta({ ...meta, connectors: { ...connectors, ...patch } });
-    return /* @__PURE__ */ import_react9.default.createElement("section", { className: "lpm-section" }, /* @__PURE__ */ import_react9.default.createElement("header", null, /* @__PURE__ */ import_react9.default.createElement("div", null, /* @__PURE__ */ import_react9.default.createElement("h2", null, "连接器"), /* @__PURE__ */ import_react9.default.createElement("p", null, "从微信、飞书、Telegram 或任何能发 HTTP 请求的地方，把想法丢进来。")), /* @__PURE__ */ import_react9.default.createElement("div", { className: "lpm-statusline" }, /* @__PURE__ */ import_react9.default.createElement("span", { className: `lpm-statusdot ${status?.running ? "ok" : status?.enabled ? "warn" : ""}`.trim() }), status?.running ? "Telegram 正在接收" : status?.enabled ? "Telegram 已开启但未连接" : "Telegram 未开启")), /* @__PURE__ */ import_react9.default.createElement("div", { className: "lpm-toggle-row" }, /* @__PURE__ */ import_react9.default.createElement("span", null, "Telegram Bot（原生长轮询，不需要公网地址）"), /* @__PURE__ */ import_react9.default.createElement(Toggle, { checked: telegram.enabled, onChange: (value) => setTelegram({ enabled: value }), label: "启用 Telegram" })), /* @__PURE__ */ import_react9.default.createElement("div", { className: "lpm-grid-2" }, /* @__PURE__ */ import_react9.default.createElement(Field, { label: "Bot Token" }, /* @__PURE__ */ import_react9.default.createElement(
+    return /* @__PURE__ */ import_react10.default.createElement("section", { className: "lpm-section" }, /* @__PURE__ */ import_react10.default.createElement("header", null, /* @__PURE__ */ import_react10.default.createElement("div", null, /* @__PURE__ */ import_react10.default.createElement("h2", null, "连接器"), /* @__PURE__ */ import_react10.default.createElement("p", null, "从微信、飞书、Telegram 或任何能发 HTTP 请求的地方，把想法丢进来。")), /* @__PURE__ */ import_react10.default.createElement("div", { className: "lpm-statusline" }, /* @__PURE__ */ import_react10.default.createElement("span", { className: `lpm-statusdot ${status?.running ? "ok" : status?.enabled ? "warn" : ""}`.trim() }), status?.running ? "Telegram 正在接收" : status?.enabled ? "Telegram 已开启但未连接" : "Telegram 未开启")), /* @__PURE__ */ import_react10.default.createElement("div", { className: "lpm-toggle-row" }, /* @__PURE__ */ import_react10.default.createElement("span", null, "Telegram Bot（原生长轮询，不需要公网地址）"), /* @__PURE__ */ import_react10.default.createElement(Toggle, { checked: telegram.enabled, onChange: (value) => setTelegram({ enabled: value }), label: "启用 Telegram" })), /* @__PURE__ */ import_react10.default.createElement("div", { className: "lpm-grid-2" }, /* @__PURE__ */ import_react10.default.createElement(Field, { label: "Bot Token" }, /* @__PURE__ */ import_react10.default.createElement(
       "input",
       {
         className: "lpm-input",
@@ -4351,7 +4910,7 @@ window.__ModuleLoader__.load({
         placeholder: "123456:ABC-DEF…",
         onChange: (event) => setTelegram({ token: event.target.value })
       }
-    )), /* @__PURE__ */ import_react9.default.createElement(Field, { label: "你的 chat id", hint: "给 bot 发 /start 即可看到" }, /* @__PURE__ */ import_react9.default.createElement(
+    )), /* @__PURE__ */ import_react10.default.createElement(Field, { label: "你的 chat id", hint: "给 bot 发 /start 即可看到" }, /* @__PURE__ */ import_react10.default.createElement(
       "input",
       {
         className: "lpm-input",
@@ -4359,7 +4918,7 @@ window.__ModuleLoader__.load({
         placeholder: "例如 123456789",
         onChange: (event) => setTelegram({ chatId: event.target.value })
       }
-    ))), /* @__PURE__ */ import_react9.default.createElement("p", { className: "lpm-help" }, "在 Telegram 里找 ", /* @__PURE__ */ import_react9.default.createElement("b", null, "@BotFather"), " 发 /newbot，把 token 填到这里；再给你的 bot 发一条 ", /* @__PURE__ */ import_react9.default.createElement("b", null, "/start"), "，它会告诉你 chat id。 保存后几秒内生效。", status?.lastError ? /* @__PURE__ */ import_react9.default.createElement("span", { style: { color: "var(--lpm-danger)" } }, " 最近错误：", status.lastError) : null), /* @__PURE__ */ import_react9.default.createElement(Field, { label: "群机器人 / Webhook", hint: "飞书、企业微信、Slack、n8n…（用于推送摘要）" }, /* @__PURE__ */ import_react9.default.createElement("div", { className: "lpm-rows" }, connectors.notify.map((entry, index) => /* @__PURE__ */ import_react9.default.createElement("div", { key: index, className: "lpm-row" }, /* @__PURE__ */ import_react9.default.createElement(
+    ))), /* @__PURE__ */ import_react10.default.createElement("p", { className: "lpm-help" }, "在 Telegram 里找 ", /* @__PURE__ */ import_react10.default.createElement("b", null, "@BotFather"), " 发 /newbot，把 token 填到这里；再给你的 bot 发一条 ", /* @__PURE__ */ import_react10.default.createElement("b", null, "/start"), "，它会告诉你 chat id。 保存后几秒内生效。", status?.lastError ? /* @__PURE__ */ import_react10.default.createElement("span", { style: { color: "var(--lpm-danger)" } }, " 最近错误：", status.lastError) : null), /* @__PURE__ */ import_react10.default.createElement(Field, { label: "群机器人 / Webhook", hint: "飞书、企业微信、Slack、n8n…（用于推送摘要）" }, /* @__PURE__ */ import_react10.default.createElement("div", { className: "lpm-rows" }, connectors.notify.map((entry, index) => /* @__PURE__ */ import_react10.default.createElement("div", { key: index, className: "lpm-row" }, /* @__PURE__ */ import_react10.default.createElement(
       "select",
       {
         className: "lpm-select",
@@ -4371,10 +4930,10 @@ window.__ModuleLoader__.load({
           setConnectors({ notify });
         }
       },
-      /* @__PURE__ */ import_react9.default.createElement("option", { value: "feishu" }, "飞书"),
-      /* @__PURE__ */ import_react9.default.createElement("option", { value: "wecom" }, "企业微信"),
-      /* @__PURE__ */ import_react9.default.createElement("option", { value: "webhook" }, "通用")
-    ), /* @__PURE__ */ import_react9.default.createElement(
+      /* @__PURE__ */ import_react10.default.createElement("option", { value: "feishu" }, "飞书"),
+      /* @__PURE__ */ import_react10.default.createElement("option", { value: "wecom" }, "企业微信"),
+      /* @__PURE__ */ import_react10.default.createElement("option", { value: "webhook" }, "通用")
+    ), /* @__PURE__ */ import_react10.default.createElement(
       "input",
       {
         className: "lpm-input",
@@ -4386,7 +4945,7 @@ window.__ModuleLoader__.load({
           setConnectors({ notify });
         }
       }
-    ), /* @__PURE__ */ import_react9.default.createElement(IconButton, { icon: "send", label: "发一条测试消息", onClick: () => void test({ kind: entry.kind, url: entry.url }) }), /* @__PURE__ */ import_react9.default.createElement(
+    ), /* @__PURE__ */ import_react10.default.createElement(IconButton, { icon: "send", label: "发一条测试消息", onClick: () => void test({ kind: entry.kind, url: entry.url }) }), /* @__PURE__ */ import_react10.default.createElement(
       IconButton,
       {
         icon: "trash",
@@ -4394,7 +4953,7 @@ window.__ModuleLoader__.load({
         className: "is-danger",
         onClick: () => setConnectors({ notify: connectors.notify.filter((_, position) => position !== index) })
       }
-    ))), /* @__PURE__ */ import_react9.default.createElement("div", null, /* @__PURE__ */ import_react9.default.createElement(
+    ))), /* @__PURE__ */ import_react10.default.createElement("div", null, /* @__PURE__ */ import_react10.default.createElement(
       Button,
       {
         size: "sm",
@@ -4403,16 +4962,16 @@ window.__ModuleLoader__.load({
         onClick: () => setConnectors({ notify: [...connectors.notify, { kind: "feishu", url: "" }] })
       },
       "添加 Webhook"
-    )))), /* @__PURE__ */ import_react9.default.createElement("div", { style: { display: "flex", gap: 8, justifyContent: "flex-end" } }, /* @__PURE__ */ import_react9.default.createElement(Button, { size: "sm", variant: "quiet", onClick: () => void test({ kind: "telegram", token: telegram.token, chatId: telegram.chatId }) }, "测试 Telegram"), /* @__PURE__ */ import_react9.default.createElement(Button, { size: "sm", variant: "primary", disabled: saving, onClick: () => void save({ connectors }, "连接器已保存") }, "保存连接器")), /* @__PURE__ */ import_react9.default.createElement("div", { style: { borderTop: "1px solid var(--lpm-line)", paddingTop: 14, display: "flex", flexDirection: "column", gap: 10 } }, /* @__PURE__ */ import_react9.default.createElement(Field, { label: "通用入口", hint: "任何渠道都可以 POST 到这里" }, /* @__PURE__ */ import_react9.default.createElement("div", { className: "lpm-row" }, /* @__PURE__ */ import_react9.default.createElement("input", { className: "lpm-input lpm-mono", readOnly: true, value: ingestUrl, "aria-label": "入口地址" }), /* @__PURE__ */ import_react9.default.createElement(CopyButton, { text: ingestUrl, label: "复制地址" }))), /* @__PURE__ */ import_react9.default.createElement(Field, { label: "Ingest token", hint: "请求头 x-lifepm-token 或 ?k=" }, /* @__PURE__ */ import_react9.default.createElement("div", { className: "lpm-row" }, /* @__PURE__ */ import_react9.default.createElement("input", { className: "lpm-input lpm-mono", readOnly: true, value: token, "aria-label": "入口 token" }), /* @__PURE__ */ import_react9.default.createElement(CopyButton, { text: token, label: "复制 token" }), /* @__PURE__ */ import_react9.default.createElement(Button, { size: "sm", variant: "ghost", icon: "refresh", onClick: () => setConnectors({ token: randomToken() }) }, "重新生成"))), /* @__PURE__ */ import_react9.default.createElement("pre", { className: "lpm-code" }, `curl -s -X POST '${ingestUrl}?k=${token || "<token>"}' \\
+    )))), /* @__PURE__ */ import_react10.default.createElement("div", { style: { display: "flex", gap: 8, justifyContent: "flex-end" } }, /* @__PURE__ */ import_react10.default.createElement(Button, { size: "sm", variant: "quiet", onClick: () => void test({ kind: "telegram", token: telegram.token, chatId: telegram.chatId }) }, "测试 Telegram"), /* @__PURE__ */ import_react10.default.createElement(Button, { size: "sm", variant: "primary", disabled: saving, onClick: () => void save({ connectors }, "连接器已保存") }, "保存连接器")), /* @__PURE__ */ import_react10.default.createElement("div", { style: { borderTop: "1px solid var(--lpm-line)", paddingTop: 14, display: "flex", flexDirection: "column", gap: 10 } }, /* @__PURE__ */ import_react10.default.createElement(Field, { label: "通用入口", hint: "任何渠道都可以 POST 到这里" }, /* @__PURE__ */ import_react10.default.createElement("div", { className: "lpm-row" }, /* @__PURE__ */ import_react10.default.createElement("input", { className: "lpm-input lpm-mono", readOnly: true, value: ingestUrl, "aria-label": "入口地址" }), /* @__PURE__ */ import_react10.default.createElement(CopyButton, { text: ingestUrl, label: "复制地址" }))), /* @__PURE__ */ import_react10.default.createElement(Field, { label: "Ingest token", hint: "请求头 x-lifepm-token 或 ?k=" }, /* @__PURE__ */ import_react10.default.createElement("div", { className: "lpm-row" }, /* @__PURE__ */ import_react10.default.createElement("input", { className: "lpm-input lpm-mono", readOnly: true, value: token, "aria-label": "入口 token" }), /* @__PURE__ */ import_react10.default.createElement(CopyButton, { text: token, label: "复制 token" }), /* @__PURE__ */ import_react10.default.createElement(Button, { size: "sm", variant: "ghost", icon: "refresh", onClick: () => setConnectors({ token: randomToken() }) }, "重新生成"))), /* @__PURE__ */ import_react10.default.createElement("pre", { className: "lpm-code" }, `curl -s -X POST '${ingestUrl}?k=${token || "<token>"}' \\
     -H 'content-type: application/json' \\
-    -d '{"text":"想到一个婚礼场地","channel":"wechat"}'`), /* @__PURE__ */ import_react9.default.createElement("p", { className: "lpm-help" }, "指令：", /* @__PURE__ */ import_react9.default.createElement("b", null, "/task 内容"), " 直接建任务，", /* @__PURE__ */ import_react9.default.createElement("b", null, "/done 关键词"), " 完成，", /* @__PURE__ */ import_react9.default.createElement("b", null, "/note 内容"), " 写日记，", /* @__PURE__ */ import_react9.default.createElement("b", null, "/today"), " 看今天。其他文字一律进收件箱。")), /* @__PURE__ */ import_react9.default.createElement("div", { style: { borderTop: "1px solid var(--lpm-line)", paddingTop: 14, display: "flex", flexDirection: "column", gap: 10 } }, /* @__PURE__ */ import_react9.default.createElement("div", { className: "lpm-toggle-row" }, /* @__PURE__ */ import_react9.default.createElement("span", null, "每日摘要（早上把今天的三件事推给你）"), /* @__PURE__ */ import_react9.default.createElement(
+    -d '{"text":"想到一个婚礼场地","channel":"wechat"}'`), /* @__PURE__ */ import_react10.default.createElement("p", { className: "lpm-help" }, "指令：", /* @__PURE__ */ import_react10.default.createElement("b", null, "/task 内容"), " 直接建任务，", /* @__PURE__ */ import_react10.default.createElement("b", null, "/done 关键词"), " 完成，", /* @__PURE__ */ import_react10.default.createElement("b", null, "/note 内容"), " 写日记，", /* @__PURE__ */ import_react10.default.createElement("b", null, "/today"), " 看今天。其他文字一律进收件箱。")), /* @__PURE__ */ import_react10.default.createElement("div", { style: { borderTop: "1px solid var(--lpm-line)", paddingTop: 14, display: "flex", flexDirection: "column", gap: 10 } }, /* @__PURE__ */ import_react10.default.createElement("div", { className: "lpm-toggle-row" }, /* @__PURE__ */ import_react10.default.createElement("span", null, "每日摘要（早上把今天的三件事推给你）"), /* @__PURE__ */ import_react10.default.createElement(
       Toggle,
       {
         checked: connectors.digest.enabled,
         onChange: (value) => setConnectors({ digest: { ...connectors.digest, enabled: value } }),
         label: "启用每日摘要"
       }
-    )), /* @__PURE__ */ import_react9.default.createElement("div", { className: "lpm-row" }, /* @__PURE__ */ import_react9.default.createElement("span", { className: "lpm-muted", style: { fontSize: 12 } }, "发送时间"), /* @__PURE__ */ import_react9.default.createElement(
+    )), /* @__PURE__ */ import_react10.default.createElement("div", { className: "lpm-row" }, /* @__PURE__ */ import_react10.default.createElement("span", { className: "lpm-muted", style: { fontSize: 12 } }, "发送时间"), /* @__PURE__ */ import_react10.default.createElement(
       "select",
       {
         className: "lpm-select",
@@ -4421,11 +4980,11 @@ window.__ModuleLoader__.load({
         "aria-label": "摘要发送时间",
         onChange: (event) => setConnectors({ digest: { ...connectors.digest, hour: Number(event.target.value) } })
       },
-      Array.from({ length: 24 }, (_, hour) => /* @__PURE__ */ import_react9.default.createElement("option", { key: hour, value: String(hour) }, `${String(hour).padStart(2, "0")}:00`))
-    ), /* @__PURE__ */ import_react9.default.createElement("span", { style: { flex: "1 1 auto" } }), /* @__PURE__ */ import_react9.default.createElement(Button, { size: "sm", variant: "quiet", disabled: saving, onClick: () => void save({ connectors }, "摘要设置已保存") }, "保存摘要"))));
+      Array.from({ length: 24 }, (_, hour) => /* @__PURE__ */ import_react10.default.createElement("option", { key: hour, value: String(hour) }, `${String(hour).padStart(2, "0")}:00`))
+    ), /* @__PURE__ */ import_react10.default.createElement("span", { style: { flex: "1 1 auto" } }), /* @__PURE__ */ import_react10.default.createElement(Button, { size: "sm", variant: "quiet", disabled: saving, onClick: () => void save({ connectors }, "摘要设置已保存") }, "保存摘要"))));
   }
   function DataSection({ data, act, showToast }) {
-    return /* @__PURE__ */ import_react9.default.createElement("section", { className: "lpm-section" }, /* @__PURE__ */ import_react9.default.createElement("header", null, /* @__PURE__ */ import_react9.default.createElement("div", null, /* @__PURE__ */ import_react9.default.createElement("h2", null, "数据"), /* @__PURE__ */ import_react9.default.createElement("p", null, "全部是本地 Markdown。你可以直接编辑、备份，或者放进 git。"))), /* @__PURE__ */ import_react9.default.createElement("div", { className: "lpm-row" }, /* @__PURE__ */ import_react9.default.createElement("input", { className: "lpm-input lpm-mono", readOnly: true, value: data.dataDir, "aria-label": "数据目录" }), /* @__PURE__ */ import_react9.default.createElement(CopyButton, { text: data.dataDir, label: "复制路径" })), /* @__PURE__ */ import_react9.default.createElement("div", { className: "lpm-row", style: { flexWrap: "wrap" } }, /* @__PURE__ */ import_react9.default.createElement(Pill, null, `事项 ${data.stats.total}`), /* @__PURE__ */ import_react9.default.createElement(Pill, null, `项目 ${data.projects.length}`), /* @__PURE__ */ import_react9.default.createElement(Pill, null, `收件箱 ${data.inbox.length}`), /* @__PURE__ */ import_react9.default.createElement(Pill, null, `本周 ${data.week}`), /* @__PURE__ */ import_react9.default.createElement(Pill, null, `生成于 ${formatStamp(data.generatedAt)}`)), /* @__PURE__ */ import_react9.default.createElement("div", { style: { display: "flex", gap: 8, flexWrap: "wrap" } }, /* @__PURE__ */ import_react9.default.createElement(
+    return /* @__PURE__ */ import_react10.default.createElement("section", { className: "lpm-section" }, /* @__PURE__ */ import_react10.default.createElement("header", null, /* @__PURE__ */ import_react10.default.createElement("div", null, /* @__PURE__ */ import_react10.default.createElement("h2", null, "数据"), /* @__PURE__ */ import_react10.default.createElement("p", null, "全部是本地 Markdown。你可以直接编辑、备份，或者放进 git。"))), /* @__PURE__ */ import_react10.default.createElement("div", { className: "lpm-row" }, /* @__PURE__ */ import_react10.default.createElement("input", { className: "lpm-input lpm-mono", readOnly: true, value: data.dataDir, "aria-label": "数据目录" }), /* @__PURE__ */ import_react10.default.createElement(CopyButton, { text: data.dataDir, label: "复制路径" })), /* @__PURE__ */ import_react10.default.createElement("div", { className: "lpm-row", style: { flexWrap: "wrap" } }, /* @__PURE__ */ import_react10.default.createElement(Pill, null, `事项 ${data.stats.total}`), /* @__PURE__ */ import_react10.default.createElement(Pill, null, `项目 ${data.projects.length}`), /* @__PURE__ */ import_react10.default.createElement(Pill, null, `收件箱 ${data.inbox.length}`), /* @__PURE__ */ import_react10.default.createElement(Pill, null, `本周 ${data.week}`), /* @__PURE__ */ import_react10.default.createElement(Pill, null, `生成于 ${formatStamp(data.generatedAt)}`)), /* @__PURE__ */ import_react10.default.createElement("div", { style: { display: "flex", gap: 8, flexWrap: "wrap" } }, /* @__PURE__ */ import_react10.default.createElement(
       Button,
       {
         size: "sm",
@@ -4437,7 +4996,7 @@ window.__ModuleLoader__.load({
         }
       },
       "载入示例数据"
-    ), /* @__PURE__ */ import_react9.default.createElement(Button, { size: "sm", variant: "ghost", icon: "refresh", onClick: () => void act(() => api.state()) }, "重新读取")), /* @__PURE__ */ import_react9.default.createElement("p", { className: "lpm-help" }, "目录结构：", /* @__PURE__ */ import_react9.default.createElement("span", { className: "lpm-mono" }, "pm.md · tasks/ · projects/ · inbox.md · journal/ · reviews/"), " · 插件版本 0.1.0"));
+    ), /* @__PURE__ */ import_react10.default.createElement(Button, { size: "sm", variant: "ghost", icon: "refresh", onClick: () => void act(() => api.state()) }, "重新读取")), /* @__PURE__ */ import_react10.default.createElement("p", { className: "lpm-help" }, "目录结构：", /* @__PURE__ */ import_react10.default.createElement("span", { className: "lpm-mono" }, "pm.md · tasks/ · projects/ · inbox.md · journal/ · reviews/"), " · 插件版本 0.1.0"));
   }
   function toMetaDraft(meta) {
     return {
@@ -4471,6 +5030,7 @@ window.__ModuleLoader__.load({
   // plugin/src/client/app.jsx
   var VIEWS = [
     { id: "home", label: "本周" },
+    { id: "canvas", label: "全貌" },
     { id: "projects", label: "项目" },
     { id: "board", label: "全部" },
     { id: "records", label: "记录" },
@@ -4478,21 +5038,21 @@ window.__ModuleLoader__.load({
   ];
   var VIEW_STORAGE_KEY = "lifepm.view.v2";
   function useDashboard() {
-    const [data, setData] = (0, import_react10.useState)(null);
-    const [status, setStatus] = (0, import_react10.useState)("loading");
-    const [error, setError] = (0, import_react10.useState)(null);
-    const [busy, setBusy] = (0, import_react10.useState)(false);
-    const [toast, setToast] = (0, import_react10.useState)(null);
-    const alive = (0, import_react10.useRef)(true);
-    const toastTimer = (0, import_react10.useRef)(null);
-    (0, import_react10.useEffect)(() => {
+    const [data, setData] = (0, import_react11.useState)(null);
+    const [status, setStatus] = (0, import_react11.useState)("loading");
+    const [error, setError] = (0, import_react11.useState)(null);
+    const [busy, setBusy] = (0, import_react11.useState)(false);
+    const [toast, setToast] = (0, import_react11.useState)(null);
+    const alive = (0, import_react11.useRef)(true);
+    const toastTimer = (0, import_react11.useRef)(null);
+    (0, import_react11.useEffect)(() => {
       alive.current = true;
       return () => {
         alive.current = false;
         clearTimeout(toastTimer.current);
       };
     }, []);
-    const showToast = (0, import_react10.useCallback)((text, tone = "info") => {
+    const showToast = (0, import_react11.useCallback)((text, tone = "info") => {
       if (text === void 0 || text === null || text === "") return;
       setToast({ text: String(text), tone });
       clearTimeout(toastTimer.current);
@@ -4500,7 +5060,7 @@ window.__ModuleLoader__.load({
         if (alive.current) setToast(null);
       }, tone === "error" ? 4200 : 2400);
     }, []);
-    const load = (0, import_react10.useCallback)(async (options = {}) => {
+    const load = (0, import_react11.useCallback)(async (options = {}) => {
       try {
         const next = await api.state();
         if (!alive.current) return next;
@@ -4515,7 +5075,7 @@ window.__ModuleLoader__.load({
         return null;
       }
     }, []);
-    (0, import_react10.useEffect)(() => {
+    (0, import_react11.useEffect)(() => {
       void load();
       const interval = setInterval(() => {
         if (document.visibilityState === "visible") void load({ initial: false });
@@ -4532,7 +5092,7 @@ window.__ModuleLoader__.load({
         window.removeEventListener("focus", onFocus);
       };
     }, [load]);
-    const act = (0, import_react10.useCallback)(async (work, successMessage) => {
+    const act = (0, import_react11.useCallback)(async (work, successMessage) => {
       setBusy(true);
       try {
         const result = await work();
@@ -4550,15 +5110,15 @@ window.__ModuleLoader__.load({
   }
   function App() {
     const dashboard = useDashboard();
-    const [view, setView] = (0, import_react10.useState)(() => {
+    const [view, setView] = (0, import_react11.useState)(() => {
       try {
         return localStorage.getItem(VIEW_STORAGE_KEY) ?? "home";
       } catch {
         return "home";
       }
     });
-    const [selectedId, setSelectedId] = (0, import_react10.useState)(null);
-    const changeView = (0, import_react10.useCallback)((next) => {
+    const [selectedId, setSelectedId] = (0, import_react11.useState)(null);
+    const changeView = (0, import_react11.useCallback)((next) => {
       setView(next);
       try {
         localStorage.setItem(VIEW_STORAGE_KEY, next);
@@ -4566,13 +5126,13 @@ window.__ModuleLoader__.load({
       }
     }, []);
     const { data, status, error, busy, toast, act, reload, showToast } = dashboard;
-    const openTask = (0, import_react10.useCallback)((id) => setSelectedId(id), []);
-    const closeTask = (0, import_react10.useCallback)(() => setSelectedId(null), []);
-    const selected = (0, import_react10.useMemo)(() => {
+    const openTask = (0, import_react11.useCallback)((id) => setSelectedId(id), []);
+    const closeTask = (0, import_react11.useCallback)(() => setSelectedId(null), []);
+    const selected = (0, import_react11.useMemo)(() => {
       if (data === null || selectedId === null) return null;
       return data.tasks.find((task) => task.id === selectedId) ?? null;
     }, [data, selectedId]);
-    const context = (0, import_react10.useMemo)(() => ({
+    const context = (0, import_react11.useMemo)(() => ({
       data,
       busy,
       act,
@@ -4583,81 +5143,82 @@ window.__ModuleLoader__.load({
       goTo: changeView
     }), [data, busy, act, reload, showToast, openTask, closeTask, changeView]);
     if (data === null && status === "loading") {
-      return import_react10.default.createElement(
+      return import_react11.default.createElement(
         "div",
         { className: "lpm" },
-        import_react10.default.createElement(
+        import_react11.default.createElement(
           "div",
           { className: "lpm-loading" },
-          import_react10.default.createElement(Spinner, { label: "加载 LifePM" }),
-          import_react10.default.createElement("span", null, "正在读取你的看板…")
+          import_react11.default.createElement(Spinner, { label: "加载 LifePM" }),
+          import_react11.default.createElement("span", null, "正在读取你的看板…")
         )
       );
     }
     if (data === null) {
-      return import_react10.default.createElement(
+      return import_react11.default.createElement(
         "div",
         { className: "lpm" },
-        import_react10.default.createElement(
+        import_react11.default.createElement(
           "div",
           { className: "lpm-empty" },
-          import_react10.default.createElement("h2", null, "打不开 LifePM"),
-          import_react10.default.createElement("p", null, error ?? "未知错误"),
-          import_react10.default.createElement(Button, { variant: "quiet", icon: "refresh", onClick: () => void reload() }, "重试")
+          import_react11.default.createElement("h2", null, "打不开 LifePM"),
+          import_react11.default.createElement("p", null, error ?? "未知错误"),
+          import_react11.default.createElement(Button, { variant: "quiet", icon: "refresh", onClick: () => void reload() }, "重试")
         )
       );
     }
     const stats = data.stats;
     const isBlank = data.tasks.length === 0 && data.projects.length === 0 && data.inbox.length === 0;
-    return import_react10.default.createElement(
+    return import_react11.default.createElement(
       LifePMContext.Provider,
       { value: context },
-      import_react10.default.createElement(
+      import_react11.default.createElement(
         "div",
         { className: "lpm" },
-        import_react10.default.createElement(Header, { data, busy, reload, onSettings: () => changeView("settings") }),
-        import_react10.default.createElement(Tabs, { view, changeView, stats, data }),
-        import_react10.default.createElement(
+        import_react11.default.createElement(Header, { data, busy, reload, onSettings: () => changeView("settings") }),
+        import_react11.default.createElement(Tabs, { view, changeView, stats, data }),
+        import_react11.default.createElement(
           "div",
           { className: "lpm-scroll" },
-          error !== null && data !== null ? import_react10.default.createElement(
+          error !== null && data !== null ? import_react11.default.createElement(
             "div",
             { className: "lpm-view" },
-            import_react10.default.createElement(
+            import_react11.default.createElement(
               "div",
               { className: "lpm-inline-error" },
-              import_react10.default.createElement("span", null, `同步失败：${error}`),
-              import_react10.default.createElement(Button, { size: "sm", variant: "quiet", onClick: () => void reload() }, "重试")
+              import_react11.default.createElement("span", null, `同步失败：${error}`),
+              import_react11.default.createElement(Button, { size: "sm", variant: "quiet", onClick: () => void reload() }, "重试")
             )
           ) : null,
-          view === "home" ? import_react10.default.createElement(HomeView, { blank: isBlank }) : null,
-          view === "projects" ? import_react10.default.createElement(ProjectsView, null) : null,
-          view === "board" ? import_react10.default.createElement(BoardView, { blank: isBlank }) : null,
-          view === "records" ? import_react10.default.createElement(RecordsView, null) : null,
-          view === "settings" ? import_react10.default.createElement(SettingsView, null) : null
+          view === "home" ? import_react11.default.createElement(HomeView, { blank: isBlank }) : null,
+          view === "canvas" ? import_react11.default.createElement(CanvasView, null) : null,
+          view === "projects" ? import_react11.default.createElement(ProjectsView, null) : null,
+          view === "board" ? import_react11.default.createElement(BoardView, { blank: isBlank }) : null,
+          view === "records" ? import_react11.default.createElement(RecordsView, null) : null,
+          view === "settings" ? import_react11.default.createElement(SettingsView, null) : null
         ),
-        selected !== null ? import_react10.default.createElement(TaskDrawer, { task: selected, onClose: closeTask }) : null,
-        toast !== null ? import_react10.default.createElement(
+        selected !== null ? import_react11.default.createElement(TaskDrawer, { task: selected, onClose: closeTask }) : null,
+        toast !== null ? import_react11.default.createElement(
           "div",
           { className: `lpm-toast ${toast.tone === "error" ? "is-error" : ""}`.trim(), role: "status" },
-          toast.tone === "error" ? import_react10.default.createElement(Icon, { name: "close", size: 13 }) : import_react10.default.createElement(Icon, { name: "check", size: 13 }),
-          import_react10.default.createElement("span", null, toast.text)
+          toast.tone === "error" ? import_react11.default.createElement(Icon, { name: "close", size: 13 }) : import_react11.default.createElement(Icon, { name: "check", size: 13 }),
+          import_react11.default.createElement("span", null, toast.text)
         ) : null
       )
     );
   }
   function Header({ data, busy, reload, onSettings }) {
     const { meta, today } = data;
-    const [editing, setEditing] = (0, import_react10.useState)(false);
-    const [draft, setDraft] = (0, import_react10.useState)(meta.focus ?? "");
-    const [capture, setCapture] = (0, import_react10.useState)("");
-    const captureRef = (0, import_react10.useRef)(null);
-    const inputRef = (0, import_react10.useRef)(null);
+    const [editing, setEditing] = (0, import_react11.useState)(false);
+    const [draft, setDraft] = (0, import_react11.useState)(meta.focus ?? "");
+    const [capture, setCapture] = (0, import_react11.useState)("");
+    const captureRef = (0, import_react11.useRef)(null);
+    const inputRef = (0, import_react11.useRef)(null);
     const { act } = usePMContext();
-    (0, import_react10.useEffect)(() => {
+    (0, import_react11.useEffect)(() => {
       setDraft(meta.focus ?? "");
     }, [meta.focus]);
-    (0, import_react10.useEffect)(() => {
+    (0, import_react11.useEffect)(() => {
       if (editing) inputRef.current?.focus();
     }, [editing]);
     const saveFocus = () => {
@@ -4673,7 +5234,7 @@ window.__ModuleLoader__.load({
       const ok = await act(() => api.createTask({ quickAdd: text, status: "inbox" }), "已收进收件箱");
       if (ok === null) setCapture(text);
     };
-    (0, import_react10.useEffect)(() => {
+    (0, import_react11.useEffect)(() => {
       const onKey = (event) => {
         if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "k") {
           event.preventDefault();
@@ -4683,36 +5244,36 @@ window.__ModuleLoader__.load({
       window.addEventListener("keydown", onKey);
       return () => window.removeEventListener("keydown", onKey);
     }, []);
-    return import_react10.default.createElement(
+    return import_react11.default.createElement(
       "header",
       { className: "lpm-head" },
-      import_react10.default.createElement(
+      import_react11.default.createElement(
         "div",
         { className: "lpm-head-top" },
-        import_react10.default.createElement(
+        import_react11.default.createElement(
           "div",
           { className: "lpm-eyebrow" },
-          import_react10.default.createElement("span", { className: "lpm-dot" }),
+          import_react11.default.createElement("span", { className: "lpm-dot" }),
           "LIFE PM",
-          import_react10.default.createElement("span", { style: { opacity: 0.5 } }, "·"),
-          import_react10.default.createElement("span", null, "人生项目管理")
+          import_react11.default.createElement("span", { style: { opacity: 0.5 } }, "·"),
+          import_react11.default.createElement("span", null, "人生项目管理")
         ),
-        import_react10.default.createElement(
+        import_react11.default.createElement(
           "div",
           { className: "lpm-head-actions" },
-          data.connectors?.telegram?.running ? import_react10.default.createElement("span", { className: "lpm-synced", title: "Telegram 正在接收消息" }, "TG 在线") : null,
-          import_react10.default.createElement("span", { className: "lpm-synced" }, `更新于 ${formatStamp(data.generatedAt)}`),
-          import_react10.default.createElement(IconButton, { icon: "refresh", label: "刷新", onClick: () => void reload(), disabled: busy }),
-          import_react10.default.createElement(IconButton, { icon: "settings", label: "设置", onClick: onSettings })
+          data.connectors?.telegram?.running ? import_react11.default.createElement("span", { className: "lpm-synced", title: "Telegram 正在接收消息" }, "TG 在线") : null,
+          import_react11.default.createElement("span", { className: "lpm-synced" }, `更新于 ${formatStamp(data.generatedAt)}`),
+          import_react11.default.createElement(IconButton, { icon: "refresh", label: "刷新", onClick: () => void reload(), disabled: busy }),
+          import_react11.default.createElement(IconButton, { icon: "settings", label: "设置", onClick: onSettings })
         )
       ),
-      import_react10.default.createElement(
+      import_react11.default.createElement(
         "div",
         { className: "lpm-title-row" },
-        import_react10.default.createElement(
+        import_react11.default.createElement(
           "div",
           { className: "lpm-title-block" },
-          editing ? import_react10.default.createElement("input", {
+          editing ? import_react11.default.createElement("input", {
             ref: inputRef,
             className: "lpm-focus-edit",
             value: draft,
@@ -4729,35 +5290,35 @@ window.__ModuleLoader__.load({
                 setEditing(false);
               }
             }
-          }) : import_react10.default.createElement("h1", {
+          }) : import_react11.default.createElement("h1", {
             className: `lpm-focus ${(meta.focus ?? "") === "" ? "is-empty" : ""}`.trim(),
             title: "点击编辑这一季的主线",
             onClick: () => setEditing(true)
           }, meta.focus === "" ? "这个季度，你想把注意力放在哪里？" : meta.focus),
-          import_react10.default.createElement(
+          import_react11.default.createElement(
             "div",
             { className: "lpm-subline" },
-            import_react10.default.createElement(
+            import_react11.default.createElement(
               "span",
               { className: "lpm-bet", onClick: () => setEditing(true) },
-              import_react10.default.createElement("b", null, "BET"),
-              import_react10.default.createElement("span", null, meta.bet === "" ? "写下这个季度你愿意押上的一件事" : meta.bet)
+              import_react11.default.createElement("b", null, "BET"),
+              import_react11.default.createElement("span", null, meta.bet === "" ? "写下这个季度你愿意押上的一件事" : meta.bet)
             ),
-            import_react10.default.createElement("span", null, `${meta.quarter ?? ""} · ${data.stats.open} 件未完成`)
+            import_react11.default.createElement("span", null, `${meta.quarter ?? ""} · ${data.stats.open} 件未完成`)
           )
         ),
-        import_react10.default.createElement(
+        import_react11.default.createElement(
           "div",
           { className: "lpm-head-date" },
-          import_react10.default.createElement("span", { className: "lpm-date" }, formatDateLong(today)),
-          import_react10.default.createElement("span", { className: "lpm-synced" }, `本周 ${data.week ?? ""}`)
+          import_react11.default.createElement("span", { className: "lpm-date" }, formatDateLong(today)),
+          import_react11.default.createElement("span", { className: "lpm-synced" }, `本周 ${data.week ?? ""}`)
         )
       ),
-      import_react10.default.createElement(
+      import_react11.default.createElement(
         "div",
         { className: "lpm-quickbar" },
-        import_react10.default.createElement(Icon, { name: "plus", size: 15 }),
-        import_react10.default.createElement("input", {
+        import_react11.default.createElement(Icon, { name: "plus", size: 15 }),
+        import_react11.default.createElement("input", {
           ref: captureRef,
           value: capture,
           placeholder: "记一条：想到什么就写什么，回车收进收件箱…",
@@ -4770,48 +5331,49 @@ window.__ModuleLoader__.load({
           },
           "aria-label": "快速捕获"
         }),
-        import_react10.default.createElement(
+        import_react11.default.createElement(
           "span",
           { className: "lpm-hint" },
-          import_react10.default.createElement("span", { className: "lpm-kbd" }, "⌘K"),
+          import_react11.default.createElement("span", { className: "lpm-kbd" }, "⌘K"),
           " #项目 @我 !p1 due:周五"
         )
       )
     );
   }
   function usePMContext() {
-    return import_react10.default.useContext(LifePMContext);
+    return import_react11.default.useContext(LifePMContext);
   }
   function RecordsView() {
-    const [tab, setTab] = (0, import_react10.useState)("journal");
-    return import_react10.default.createElement(
-      import_react10.default.Fragment,
+    const [tab, setTab] = (0, import_react11.useState)("journal");
+    return import_react11.default.createElement(
+      import_react11.default.Fragment,
       null,
-      import_react10.default.createElement(
+      import_react11.default.createElement(
         "div",
         { className: "lpm-view", style: { paddingBottom: 0 } },
-        import_react10.default.createElement(Segmented, {
+        import_react11.default.createElement(Segmented, {
           value: tab,
           options: [{ value: "journal", label: "日记" }, { value: "review", label: "复盘" }],
           onChange: setTab,
           ariaLabel: "记录类型"
         })
       ),
-      tab === "journal" ? import_react10.default.createElement(JournalView, null) : import_react10.default.createElement(ReviewView, null)
+      tab === "journal" ? import_react11.default.createElement(JournalView, null) : import_react11.default.createElement(ReviewView, null)
     );
   }
   function Tabs({ view, changeView, stats, data }) {
     const counts = {
       home: stats.focus,
+      canvas: 0,
       projects: data.projects.filter((project) => project.status === "active").length,
       board: stats.open,
       records: 0,
       settings: 0
     };
-    return import_react10.default.createElement(
+    return import_react11.default.createElement(
       "nav",
       { className: "lpm-tabs", role: "tablist" },
-      VIEWS.map((item) => import_react10.default.createElement(
+      VIEWS.map((item) => import_react11.default.createElement(
         "button",
         {
           key: item.id,
@@ -4822,10 +5384,10 @@ window.__ModuleLoader__.load({
           onClick: () => changeView(item.id)
         },
         item.label,
-        counts[item.id] > 0 ? import_react10.default.createElement("span", { className: "lpm-tab-count" }, counts[item.id]) : null
+        counts[item.id] > 0 ? import_react11.default.createElement("span", { className: "lpm-tab-count" }, counts[item.id]) : null
       )),
-      import_react10.default.createElement("span", { className: "lpm-tabs-spacer" }),
-      import_react10.default.createElement("span", { className: "lpm-tabs-note" }, todayISO() === data.today ? "今天" : data.today)
+      import_react11.default.createElement("span", { className: "lpm-tabs-spacer" }),
+      import_react11.default.createElement("span", { className: "lpm-tabs-note" }, todayISO() === data.today ? "今天" : data.today)
     );
   }
 
@@ -4843,7 +5405,7 @@ window.__ModuleLoader__.load({
     document.head.appendChild(style);
   }
   function SidebarIcon({ size = 20 }) {
-    return import_react11.default.createElement(
+    return import_react12.default.createElement(
       "svg",
       {
         width: size,
@@ -4856,9 +5418,9 @@ window.__ModuleLoader__.load({
         strokeLinejoin: "round",
         "aria-hidden": "true"
       },
-      import_react11.default.createElement("circle", { cx: 12, cy: 12, r: 8.6 }),
-      import_react11.default.createElement("path", { d: "M15.7 8.3l-1.9 5.5-5.5 1.9 1.9-5.5z" }),
-      import_react11.default.createElement("circle", { cx: 12, cy: 12, r: 0.9, fill: "currentColor", stroke: "none" })
+      import_react12.default.createElement("circle", { cx: 12, cy: 12, r: 8.6 }),
+      import_react12.default.createElement("path", { d: "M15.7 8.3l-1.9 5.5-5.5 1.9 1.9-5.5z" }),
+      import_react12.default.createElement("circle", { cx: 12, cy: 12, r: 0.9, fill: "currentColor", stroke: "none" })
     );
   }
   function apply(ctx) {

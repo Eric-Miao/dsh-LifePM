@@ -237,6 +237,19 @@ test('the full board is one tab away and still opens the drawer', async (t) => {
   assert.equal(update.body.patch.title, '确认领证材料（新）')
 })
 
+test('canvas tab renders one area per project', async (t) => {
+  const { container, dom } = await mountApp(t, fixture())
+  const tab = [...container.querySelectorAll('.lpm-tab')].find((button) => button.textContent.startsWith('全貌'))
+  assert.ok(tab !== undefined, 'canvas tab present')
+  await act(async () => {
+    tab.dispatchEvent(new dom.window.MouseEvent('click', { bubbles: true }))
+  })
+  assert.ok(container.querySelector('.lpm-canvas') !== null)
+  assert.ok(container.querySelectorAll('.lpm-canvas-project').length >= 2)
+  assert.match(container.textContent, /婚礼筹备/)
+  assert.match(container.textContent, /换一座城市/)
+})
+
 test('projects tab lists every project with its next action', async (t) => {
   const { container, dom } = await mountApp(t, fixture())
   const tab = [...container.querySelectorAll('.lpm-tab')].find((button) => button.textContent.startsWith('项目'))

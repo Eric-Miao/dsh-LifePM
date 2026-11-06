@@ -3,6 +3,7 @@ import { api } from './api.js'
 import { LifePMContext } from './context.js'
 import { formatDateLong, formatStamp, todayISO } from './format.js'
 import { HomeView } from './home.jsx'
+import { CanvasView } from './canvas.jsx'
 import { BoardView } from './board.jsx'
 import { TaskDrawer } from './drawer.jsx'
 import { ProjectsView } from './projects.jsx'
@@ -12,6 +13,7 @@ import { Button, Icon, IconButton, Segmented, Spinner } from './ui.jsx'
 
 const VIEWS = [
   { id: 'home', label: '本周' },
+  { id: 'canvas', label: '全貌' },
   { id: 'projects', label: '项目' },
   { id: 'board', label: '全部' },
   { id: 'records', label: '记录' },
@@ -170,6 +172,7 @@ export function App() {
                 React.createElement(Button, { size: 'sm', variant: 'quiet', onClick: () => void reload() }, '重试')))
           : null,
         view === 'home' ? React.createElement(HomeView, { blank: isBlank }) : null,
+        view === 'canvas' ? React.createElement(CanvasView, null) : null,
         view === 'projects' ? React.createElement(ProjectsView, null) : null,
         view === 'board' ? React.createElement(BoardView, { blank: isBlank }) : null,
         view === 'records' ? React.createElement(RecordsView, null) : null,
@@ -321,6 +324,7 @@ function RecordsView() {
 function Tabs({ view, changeView, stats, data }) {
   const counts = {
     home: stats.focus,
+    canvas: 0,
     projects: data.projects.filter((project) => project.status === 'active').length,
     board: stats.open,
     records: 0,
