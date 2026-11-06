@@ -2,22 +2,23 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { api } from './api.js'
 import { LifePMContext } from './context.js'
 import { formatDateLong, formatStamp, todayISO } from './format.js'
+import { HomeView } from './home.jsx'
 import { BoardView } from './board.jsx'
 import { TaskDrawer } from './drawer.jsx'
 import { ProjectsView } from './projects.jsx'
 import { JournalView, ReviewView } from './journal.jsx'
 import { SettingsView } from './settings.jsx'
-import { Button, Icon, IconButton, Spinner } from './ui.jsx'
+import { Button, Icon, IconButton, Segmented, Spinner } from './ui.jsx'
 
 const VIEWS = [
-  { id: 'board', label: '看板' },
+  { id: 'home', label: '本周' },
   { id: 'projects', label: '项目' },
-  { id: 'journal', label: '日记' },
-  { id: 'review', label: '复盘' },
+  { id: 'board', label: '全部' },
+  { id: 'records', label: '记录' },
   { id: 'settings', label: '设置' },
 ]
 
-const VIEW_STORAGE_KEY = 'lifepm.view.v1'
+const VIEW_STORAGE_KEY = 'lifepm.view.v2'
 
 /** Read the dashboard state, poll it, and expose mutations. */
 function useDashboard() {
@@ -103,9 +104,9 @@ export function App() {
   const dashboard = useDashboard()
   const [view, setView] = useState(() => {
     try {
-      return localStorage.getItem(VIEW_STORAGE_KEY) ?? 'board'
+      return localStorage.getItem(VIEW_STORAGE_KEY) ?? 'home'
     } catch {
-      return 'board'
+      return 'home'
     }
   })
   const [selectedId, setSelectedId] = useState(null)
@@ -168,14 +169,10 @@ export function App() {
                 React.createElement('span', null, `同步失败：${error}`),
                 React.createElement(Button, { size: 'sm', variant: 'quiet', onClick: () => void reload() }, '重试')))
           : null,
-        view === 'board'
-          ? (isBlank
-              ? React.createElement(BoardView, { blank: true })
-              : React.createElement(BoardView, null))
-          : null,
+        view === 'home' ? React.createElement(HomeView, { blank: isBlank }) : null,
         view === 'projects' ? React.createElement(ProjectsView, null) : null,
-        view === 'journal' ? React.createElement(JournalView, null) : null,
-        view === 'review' ? React.createElement(ReviewView, null) : null,
+        view === 'board' ? React.createElement(BoardView, { blank: isBlank }) : null,
+        view === 'records' ? React.createElement(RecordsView, null) : null,
         view === 'settings' ? React.createElement(SettingsView, null) : null),
       selected !== null
         ? React.createElement(TaskDrawer, { task: selected, onClose: closeTask })
@@ -306,13 +303,27 @@ function usePMContext() {
   return React.useContext(LifePMContext)
 }
 
+/** Journal and review share one tab. */
+function RecordsView() {
+  const [tab, setTab] = useState('journal')
+  return React.createElement(React.Fragment, null,
+    React.createElement('div', { className: 'lpm-view', style: { paddingBottom: 0 } },
+      React.createElement(Segmented, {
+        value: tab,
+        options: [{ value: 'journal', label: '日记' }, { value: 'review', label: '复盘' }],
+        onChange: setTab,
+        ariaLabel: '记录类型',
+      })),
+    tab === 'journal' ? React.createElement(JournalView, null) : React.createElement(ReviewView, null))
+}
+
 /** View switcher. */
 function Tabs({ view, changeView, stats, data }) {
   const counts = {
-    board: stats.open,
+    home: stats.focus,
     projects: data.projects.filter((project) => project.status === 'active').length,
-    journal: 0,
-    review: data.reviews.length,
+    board: stats.open,
+    records: 0,
     settings: 0,
   }
 
@@ -326,7 +337,7 @@ function Tabs({ view, changeView, stats, data }) {
       onClick: () => changeView(item.id),
     },
     item.label,
-    counts[item.id] > 0 && item.id !== 'review'
+    counts[item.id] > 0
       ? React.createElement('span', { className: 'lpm-tab-count' }, counts[item.id])
       : null)),
     React.createElement('span', { className: 'lpm-tabs-spacer' }),

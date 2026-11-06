@@ -87,8 +87,6 @@ export function createHttpHandler({ store, connectors }) {
           const review = body.op === 'save' ? await store.saveReview(week, body.body) : await store.writeReview(week)
           return sendJson(res, 200, { ok: true, review })
         }
-        case '/api/focus-today':
-          return await handleFocusToday(store, res)
         case '/api/demo': {
           const result = await store.seedDemo()
           return sendJson(res, 200, { ok: true, ...result })
@@ -129,7 +127,7 @@ async function handleTask(store, body, res) {
   if (op === 'update') {
     const id = String(body.id ?? body.key ?? '')
     const patch = { ...(body.patch ?? {}) }
-    for (const key of ['title', 'status', 'priority', 'owner', 'project', 'area', 'due', 'pin', 'notes', 'waiting_on', 'tags']) {
+    for (const key of ['title', 'status', 'priority', 'owner', 'project', 'area', 'due', 'focus', 'focus_week', 'notes', 'waiting_on', 'tags']) {
       if (body[key] !== undefined) patch[key] = body[key]
     }
     const result = await store.updateTask(id, patch)
@@ -159,6 +157,7 @@ function stripQuick(input) {
 async function handleProject(store, body, res) {
   const op = String(body.op ?? 'upsert')
   if (op === 'upsert') return sendJson(res, 200, { ok: true, project: await store.upsertProject(body) })
+  if (op === 'touch') return sendJson(res, 200, { ok: true, project: await store.touchProject(String(body.id ?? body.name ?? '')) })
   if (op === 'delete') return sendJson(res, 200, { ok: true, project: await store.deleteProject(String(body.id ?? body.name ?? ''), { unlinkTasks: body.unlinkTasks === true }) })
   return sendJson(res, 400, { error: `unknown project op ${op}` })
 }
@@ -188,33 +187,6 @@ async function handleInbox(store, body, res) {
  * @param {import('./store.js').LifePMStore} store
  * @param {import('node:http').ServerResponse} res
  */
-async function handleFocusToday(store, res) {
-  const tasks = await store.listTasks()
-  const open = tasks.filter((task) => task.status !== 'done' && task.status !== 'dropped')
-  const pinned = open.filter((task) => task.pin)
-  const ranked = [...open]
-    .filter((task) => task.status === 'now' || task.status === 'next')
-    .sort((left, right) => {
-      const priority = { p0: 0, p1: 1, p2: 2, p3: 3 }
-      const byPriority = (priority[left.priority] ?? 9) - (priority[right.priority] ?? 9)
-      if (byPriority !== 0) return byPriority
-      return String(left.due ?? '9999').localeCompare(String(right.due ?? '9999'))
-    })
-  const picked = [...pinned]
-  for (const task of ranked) {
-    if (picked.length >= 3) break
-    if (picked.some((candidate) => candidate.id === task.id)) continue
-    picked.push(task)
-  }
-  const added = []
-  for (const task of picked) {
-    if (task.pin) continue
-    await store.updateTask(task.id, { pin: true })
-    added.push(task.id)
-  }
-  return sendJson(res, 200, { ok: true, picked: picked.map((task) => ({ id: task.id, title: task.title })), added })
-}
-
 /**
  * Read and decode a JSON body.
  * @param {import('node:http').IncomingMessage} req

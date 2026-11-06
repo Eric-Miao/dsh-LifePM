@@ -69,12 +69,11 @@ node --test --test-force-exit tests/*.mjs
 | GET | `/lifepm/api/ping` | 健康检查 |
 | GET | `/lifepm/api/state` | 面板全量数据 |
 | POST | `/lifepm/api/task` | 增 / 改 / 删任务 |
-| POST | `/lifepm/api/project` | 项目 upsert / 删除 |
+| POST | `/lifepm/api/project` | 项目 upsert / touch / 删除 |
 | POST | `/lifepm/api/meta` | 主线 / 姓名 / 领域 / 连接器 |
 | POST | `/lifepm/api/inbox` | 收件箱 add / promote / remove |
 | POST | `/lifepm/api/journal` | 追加日记 |
 | POST | `/lifepm/api/review` | 生成 / 保存复盘 |
-| POST | `/lifepm/api/focus-today` | 自动挑今天三件 |
 | POST | `/lifepm/api/demo` | 空看板载入示例 |
 | POST | `/lifepm/api/connectors/test` | 发送测试消息 |
 | POST | `/lifepm/inbox?k=<token>` | 外部渠道入口（token 校验） |

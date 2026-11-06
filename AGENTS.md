@@ -17,7 +17,7 @@ status:   inbox | now | next | waiting | someday | done | dropped
 owner:    me（用户本人）| partner（伴侣）| both（两个人）
 priority: p0 最紧 → p3
 due:      YYYY-MM-DD
-pin:      true 表示放进「今天的三件」
+focus_week: 2026-W45 表示本周想做；软标记，无上限，跨周失效
 ```
 
 - `waiting` 的任务要写 `waiting_on`（在等谁 / 等什么）。
@@ -29,7 +29,7 @@ pin:      true 表示放进「今天的三件」
 
 - **捕获**：随时。
 - **整理**：一次处理收件箱不超过 10 条，剩下的留在那里没关系。
-- **复盘**：周末用 `pm_review` 生成骨架，然后和他们讨论「下周只做三件」——不要只报数字。
+- **复盘**：周末用 `pm_review` 生成骨架，然后和他们讨论下周想做什么——不要只报数字。
 
 ## 改插件时
 

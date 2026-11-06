@@ -100,7 +100,7 @@ test('tools work against a fresh store', async (t) => {
 
   const board = await byName.pm_board.execute({ view: 'overview' })
   assert.match(board.text, /预约结婚登记/)
-  assert.match(board.text, /现在 1/)
+  assert.match(board.text, /候选 1/)
 
   const updated = await byName.pm_update.execute({ id: taskId, status: 'done' })
   assert.match(updated.text, /完成/)

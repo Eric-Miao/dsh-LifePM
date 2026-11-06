@@ -196,9 +196,40 @@ test('ingest commands', async (t) => {
   assert.equal(help.action, 'help')
 })
 
+test('focus is a soft weekly lens with no quota', async (t) => {
+  const { store } = await freshStore(t)
+  for (const title of ['A', 'B', 'C', 'D', 'E']) await store.createTask({ title, status: 'now', focus: true })
+  const state = await store.state()
+  assert.equal(state.focus.length, 5, 'no cap on focused tasks')
+  assert.equal(state.stats.focus, 5)
+  const first = state.focus[0]
+  await store.updateTask(first.id, { status: 'done' })
+  const after = await store.state()
+  assert.equal(after.focus.length, 4, 'completing a focused task clears the lens')
+  assert.ok(!after.focus.some((task) => task.id === first.id))
+})
+
+test('task activity writes back to its project', async (t) => {
+  const { store } = await freshStore(t)
+  const project = await store.upsertProject({ name: 'tingjian' })
+  const task = await store.createTask({ title: '测基线', project: 'tingjian' })
+  const touched = (await store.listProjects()).find((item) => item.id === project.id)
+  assert.ok(touched.last_active)
+  assert.ok(touched.last_active >= project.last_active)
+
+  await new Promise((resolve) => setTimeout(resolve, 5))
+  await store.updateTask(task.id, { status: 'done' })
+  const done = (await store.listProjects()).find((item) => item.id === project.id)
+  assert.ok(done.last_active > touched.last_active)
+
+  await new Promise((resolve) => setTimeout(resolve, 5))
+  const manually = await store.touchProject('tingjian')
+  assert.ok(manually.last_active > done.last_active)
+})
+
 test('state and stats', async (t) => {
   const { store } = await freshStore(t)
-  await store.createTask({ title: 'A', status: 'now', pin: true })
+  await store.createTask({ title: 'A', status: 'now', focus: true })
   await store.createTask({ title: 'B', status: 'waiting' })
   await store.createTask({ title: 'C', status: 'done' })
   await store.capture('一条收件', 'app')
@@ -206,7 +237,7 @@ test('state and stats', async (t) => {
   assert.equal(state.tasks.length, 3)
   assert.equal(state.stats.now, 1)
   assert.equal(state.stats.inbox, 1)
-  assert.equal(state.stats.pinned, 1)
+  assert.equal(state.stats.focus, 1)
   assert.ok(state.dataDir)
   assert.ok(state.today.match(/^\d{4}-\d{2}-\d{2}$/))
 })
@@ -217,7 +248,7 @@ test('quick add parsing', () => {
   assert.equal(parsed.project, '家人')
   assert.equal(parsed.owner, 'both')
   assert.equal(parsed.priority, 'p1')
-  assert.equal(parsed.pin, true)
+  assert.equal(parsed.focus, true)
   assert.ok(parsed.due)
 
   const plain = parseQuickAdd('随便写点什么')
@@ -245,5 +276,5 @@ test('seed demo fills an empty store once', async (t) => {
   assert.equal(second.skipped, true)
   const tasks = await store.listTasks()
   assert.ok(tasks.length >= 8)
-  assert.ok(tasks.some((task) => task.pin))
+  assert.ok(tasks.some((task) => task.focus_week))
 })

@@ -2,7 +2,7 @@
 
 export const STATUS_LABELS = {
   inbox: '收件箱',
-  now: '现在',
+  now: '候选',
   next: '接下来',
   waiting: '等待',
   someday: '也许有一天',
@@ -12,7 +12,7 @@ export const STATUS_LABELS = {
 
 export const STATUS_HINTS = {
   inbox: '先收进来，稍后整理',
-  now: '这周真的要推进',
+  now: '可以碰，不是承诺',
   next: '排上号，但不在本周',
   waiting: '在等别人或等条件',
   someday: '值得记住，现在不做',
@@ -80,6 +80,25 @@ export function describeDue(iso) {
   if (days <= 6) return { text: `${days} 天后`, state: 'soon' }
   if (days <= 60) return { text: formatDateShort(iso), state: 'later' }
   return { text: formatDateShort(iso), state: 'later' }
+}
+
+/** Monday of the current week as `YYYY-MM-DD`. */
+export function weekStartISO(date = new Date()) {
+  const start = new Date(date.getFullYear(), date.getMonth(), date.getDate())
+  start.setDate(start.getDate() - ((start.getDay() + 6) % 7))
+  return todayISO(start)
+}
+
+/** Last-activity label: 今天 / 昨天 / 3 天前 / 2 周前. */
+export function describeActivity(iso) {
+  if (typeof iso !== 'string' || iso.length < 10) return '未记录'
+  const days = daysFromToday(iso.slice(0, 10))
+  if (days === null || days < 0) return '未记录'
+  if (days === 0) return '今天'
+  if (days === 1) return '昨天'
+  if (days < 7) return `${days} 天前`
+  if (days < 30) return `${Math.floor(days / 7)} 周前`
+  return `${Math.floor(days / 30)} 个月前`
 }
 
 /** `2026-11-04 09:12` → `09:12`; ISO timestamps → `11/04 09:12`. */

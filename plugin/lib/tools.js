@@ -22,7 +22,8 @@ const STATUS_LABEL = { inbox: '收件箱', now: '现在', next: '接下来', wai
 
 /** Tool name prefix, kept short for token cost. */
 const PREAMBLE = `LifePM 是这个工作区里用户的人生/家庭事项看板，数据是本地 Markdown（tasks/、projects/、inbox.md、journal/、reviews/）。
-状态：inbox 待整理 · now 现在做 · next 接下来 · waiting 等别人/等条件 · someday 也许 · done 完成 · dropped 放下。
+状态：inbox 待整理 · now 候选（可以碰，不是承诺）· next 接下来 · waiting 等别人/等条件 · someday 也许 · done 完成 · dropped 放下。
+本周想做（focus）：一个可选的软标记，没有数量限制；它只是本周的视角，不是承诺。
 owner：me（用户本人）· partner（伴侣）· both（两人一起）。priority：p0 最紧 → p3。`
 
 /**
@@ -97,7 +98,7 @@ export function createTools({ store }) {
                 area: { type: 'string', description: 'Life area id, e.g. home / work / relation / health / family / explore / money.' },
                 priority: { type: 'string', enum: PRIORITY_ENUM },
                 due: { type: 'string', description: 'YYYY-MM-DD or a Chinese relative date.' },
-                pin: { type: 'boolean', description: 'true puts it in today\'s three.' },
+                focus: { type: 'boolean', description: 'true marks it as something to look at this week (soft, no quota).' },
                 notes: { type: 'string', description: 'Free-form notes stored in the Markdown body.' },
               },
               required: ['title'],
@@ -122,7 +123,7 @@ export function createTools({ store }) {
     tool(
       'pm_update',
       '更新事项',
-      'Update, complete, drop, pin or re-parent an existing task. Identify it with the id from pm_board (a unique title fragment also works). Only send the fields that change; an empty field clears that field. Setting status to done records the completion time.',
+      'Update, complete, drop, focus or re-parent an existing task. Identify it with the id from pm_board (a unique title fragment also works). Only send the fields that change; an empty field clears that field. Setting status to done records the completion time.',
       {
         type: 'object',
         additionalProperties: false,
@@ -135,7 +136,7 @@ export function createTools({ store }) {
           area: { type: 'string' },
           priority: { type: 'string', enum: PRIORITY_ENUM },
           due: { type: 'string', description: 'YYYY-MM-DD, or empty to clear.' },
-          pin: { type: 'boolean' },
+          focus: { type: 'boolean', description: 'Soft weekly lens; no quota.' },
           waiting_on: { type: 'string', description: 'What or who is blocking a waiting task.' },
           notes: { type: 'string' },
         },
@@ -143,7 +144,7 @@ export function createTools({ store }) {
       },
       async (args) => {
         const patch = {}
-        for (const key of ['title', 'status', 'owner', 'project', 'area', 'priority', 'due', 'pin', 'waiting_on', 'notes']) {
+        for (const key of ['title', 'status', 'owner', 'project', 'area', 'priority', 'due', 'focus', 'waiting_on', 'notes']) {
           if (args[key] !== undefined) patch[key] = args[key]
         }
         const { task } = await store.updateTask(String(args.id), patch)
@@ -169,13 +170,16 @@ export function createTools({ store }) {
           owner: { type: 'string', enum: OWNER_ENUM },
           target: { type: 'string', description: 'Target date or horizon, e.g. 2027-05 or 2027-Q1.' },
           next: { type: 'string', description: 'The single next action.' },
+          touch: { type: 'boolean', description: 'Mark that this project moved today without changing other fields.' },
           why: { type: 'string', description: 'Why this project matters — used in reviews.' },
           notes: { type: 'string' },
         },
         required: ['name'],
       },
       async (args) => {
-        const project = await store.upsertProject(args)
+        const project = args.touch === true
+          ? await store.touchProject(String(args.id ?? args.name ?? ''))
+          : await store.upsertProject(args)
         return {
           text: `项目「${project.name}」（${project.status}）已保存。下一步：${project.next ?? '（未写）'}${project.target ? ` · 目标 ${project.target}` : ''}`,
           ids: [project.id],
@@ -352,7 +356,8 @@ async function boardText(store, args) {
 
   const stats = computeStats(tasks, inbox)
   const open = tasks.filter((task) => task.status !== 'done' && task.status !== 'dropped')
-  const pinned = open.filter((task) => task.pin)
+  const focused = open.filter((task) => task.focus_week === weekLabel())
+  const pinned = focused
   const now = open.filter((task) => task.status === 'now')
   const waiting = open.filter((task) => task.status === 'waiting')
   const dueSoon = open
@@ -363,13 +368,13 @@ async function boardText(store, args) {
   const lines = [`# LifePM · ${today}`]
   if (meta.focus !== '') lines.push(`主线：${meta.focus}`)
   if (meta.bet !== '') lines.push(`本季赌注：${meta.bet}`)
-  lines.push(`现在 ${stats.now} · 接下来 ${stats.next} · 等待 ${stats.waiting} · 收件箱 ${stats.inboxTasks}${stats.inbox > 0 ? `+${stats.inbox} 条原始捕获` : ''} · 本周完成 ${stats.doneThisWeek}`)
+  lines.push(`候选 ${stats.now} · 接下来 ${stats.next} · 等待 ${stats.waiting} · 收件箱 ${stats.inboxTasks}${stats.inbox > 0 ? `+${stats.inbox} 条原始捕获` : ''} · 本周完成 ${stats.doneThisWeek}`)
   if (pinned.length > 0) {
-    lines.push('', '今天的三件事：')
+    lines.push('', '本周想做：')
     for (const task of pinned) lines.push(`- ${task.title}${task.project ? ` · ${task.project}` : ''}${task.due ? ` · ${task.due}` : ''} （${task.id}）`)
   }
   if (now.length > 0) {
-    lines.push('', '现在做：')
+    lines.push('', '候选：')
     for (const task of now.slice(0, limit)) lines.push(taskLine(task))
   }
   if (waiting.length > 0) {

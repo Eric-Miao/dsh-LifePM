@@ -86,7 +86,7 @@ export function isoNow(date = new Date()) {
   const offset = -date.getTimezoneOffset()
   const sign = offset >= 0 ? '+' : '-'
   const absolute = Math.abs(offset)
-  return `${todayISO(date)}T${pad2(date.getHours())}:${pad2(date.getMinutes())}:${pad2(date.getSeconds())}${sign}${pad2(Math.floor(absolute / 60))}:${pad2(absolute % 60)}`
+  return `${todayISO(date)}T${pad2(date.getHours())}:${pad2(date.getMinutes())}:${pad2(date.getSeconds())}.${String(date.getMilliseconds()).padStart(3, '0')}${sign}${pad2(Math.floor(absolute / 60))}:${pad2(absolute % 60)}`
 }
 
 /** ISO-week label (`2026-W45`) for a date. */
@@ -146,6 +146,19 @@ export function slugify(title, fallback = '未命名') {
     .slice(0, 48)
     .trim()
   return cleaned.length > 0 ? cleaned : fallback
+}
+
+/**
+ * Resolve the week a task is softly focused on. There is no quota: the value
+ * is a lens, not a commitment, and it expires by comparing against the current
+ * week label.
+ * @param {Json} input task input
+ * @returns {string | undefined} YYYY-Www
+ */
+function resolveFocusWeek(input) {
+  if (input.focus === true) return weekLabel()
+  if (typeof input.focus_week === 'string' && input.focus_week !== '') return input.focus_week
+  return undefined
 }
 
 /** @param {string} prefix @returns {string} a short random id */
@@ -283,7 +296,7 @@ export function parseQuickAdd(input, context = {}) {
       }
     }
     if (word === '今天' || word === 'today!') {
-      result.pin = true
+      result.focus = true
       continue
     }
     titleParts.push(word)
@@ -489,15 +502,19 @@ export class LifePMStore {
         project,
         area: input.area === undefined ? undefined : String(input.area),
         due: normaliseDate(input.due),
-        pin: input.pin === true,
+        focus_week: resolveFocusWeek(input),
         waiting_on: input.waiting_on === undefined ? undefined : String(input.waiting_on),
         tags: stringArray(input.tags),
         created: now,
         updated: now,
         notes: String(input.notes ?? '').trim(),
       }
-      if (task.status === 'done') task.done_at = now
+      if (task.status === 'done') {
+        task.done_at = now
+        task.focus_week = undefined
+      }
       await this.write(this.file('tasks', await this.freeTaskFilename(slugify(title))), renderTask(task))
+      await this.touchProjectRef(task.project, now)
       return task
     })
   }
@@ -518,16 +535,54 @@ export class LifePMStore {
       if (patch.due !== undefined) next.due = patch.due === null || patch.due === '' ? undefined : normaliseDate(patch.due)
       if (patch.waiting_on !== undefined) next.waiting_on = patch.waiting_on === null || patch.waiting_on === '' ? undefined : String(patch.waiting_on)
       if (patch.tags !== undefined) next.tags = stringArray(patch.tags)
-      if (patch.pin !== undefined) next.pin = patch.pin === true
+      if (patch.focus !== undefined) next.focus_week = patch.focus === true ? weekLabel() : undefined
+      if (patch.focus_week !== undefined) next.focus_week = patch.focus_week === null || patch.focus_week === '' ? undefined : String(patch.focus_week)
+      if (patch.pin !== undefined) next.focus_week = patch.pin === true ? weekLabel() : undefined
       if (patch.notes !== undefined) next.notes = String(patch.notes ?? '').trim()
       if (next.status === 'done' && task.status !== 'done') next.done_at = isoNow()
       if (next.status !== 'done') next.done_at = undefined
+      if (next.status === 'done' || next.status === 'dropped') next.focus_week = undefined
       next.updated = isoNow()
       const previousFile = this.file('tasks', task.file)
       const targetFile = this.file('tasks', await this.freeTaskFilename(slugify(next.title), task.file))
       await this.write(targetFile, renderTask(next))
       if (previousFile !== targetFile && existsSync(previousFile)) await fs.unlink(previousFile)
+      await this.touchProjectRef(next.project, next.updated)
       return { task: next, changed: Object.keys(patch) }
+    })
+  }
+
+  /**
+   * Record activity on the project a task belongs to. Missing or free-form
+   * project references are ignored: a task never fails because of its tag.
+   * @param {string | undefined} reference project id or name
+   * @param {string} [when] ISO timestamp
+   */
+  async touchProjectRef(reference, when = isoNow()) {
+    if (reference === undefined || reference === '') return
+    const projects = await this.listProjects()
+    const project = projects.find((item) => item.id === reference || item.name === reference)
+    if (project === undefined) return
+    project.last_active = when
+    project.updated = when
+    await this.write(this.file('projects', project.file), renderProject(project))
+  }
+
+  /**
+   * Mark a project as touched without changing any other field.
+   * @param {string} key project id or name
+   * @returns {Promise<Json>} the updated project
+   */
+  async touchProject(key) {
+    return this.exclusive(async () => {
+      const projects = await this.listProjects()
+      const project = projects.find((item) => item.id === key || item.name === key)
+      if (project === undefined) throw new Error(`找不到项目：${key}`)
+      const now = isoNow()
+      project.last_active = now
+      project.updated = now
+      await this.write(this.file('projects', project.file), renderProject(project))
+      return project
     })
   }
 
@@ -586,6 +641,7 @@ export class LifePMStore {
           target: input.target === undefined ? undefined : String(input.target),
           next: input.next === undefined ? undefined : String(input.next),
           why: input.why === undefined ? undefined : String(input.why),
+          last_active: now,
           created: now,
           updated: now,
           notes: String(input.notes ?? '').trim(),
@@ -603,6 +659,7 @@ export class LifePMStore {
       if (input.why !== undefined) next.why = String(input.why ?? '')
       if (input.notes !== undefined) next.notes = String(input.notes ?? '').trim()
       next.updated = now
+      next.last_active = now
       const previousId = existing.id
       const nextId = existing.id === slugify(existing.name) ? slugify(next.name) : existing.id
       next.id = nextId
@@ -815,6 +872,10 @@ export class LifePMStore {
       this.journalDays(20),
       this.reviewList(8),
     ])
+    const currentWeek = weekLabel()
+    const focus = tasks
+      .filter((task) => task.focus_week === currentWeek && task.status !== 'done' && task.status !== 'dropped')
+      .sort(compareTasks)
     return {
       meta,
       tasks,
@@ -822,9 +883,10 @@ export class LifePMStore {
       inbox,
       journal,
       reviews,
+      focus,
       stats: computeStats(tasks, inbox),
       today: todayISO(),
-      week: weekLabel(),
+      week: currentWeek,
       dataDir: this.dir,
       generatedAt: isoNow(),
     }
@@ -893,10 +955,10 @@ export class LifePMStore {
     ]
     for (const project of projects) await this.upsertProject(project)
     const tasks = [
-      { title: '确认领证需要的材料清单', status: 'now', priority: 'p1', owner: 'both', project: '婚礼筹备', area: 'relation', due: normaliseDate('周五'), pin: true },
+      { title: '确认领证需要的材料清单', status: 'now', priority: 'p1', owner: 'both', project: '婚礼筹备', area: 'relation', due: normaliseDate('周五'), focus: true },
       { title: '约两家场地这周末去看', status: 'now', priority: 'p1', owner: 'partner', project: '婚礼筹备', area: 'relation', due: normaliseDate('后天') },
       { title: '算一遍搬家 + 婚礼的年度预算', status: 'next', priority: 'p2', owner: 'me', project: '换一座城市', area: 'money' },
-      { title: '问她最在意的三件事是什么', status: 'now', priority: 'p0', owner: 'me', area: 'relation', pin: true },
+      { title: '问她最在意的三件事是什么', status: 'now', priority: 'p0', owner: 'me', area: 'relation', focus: true },
       { title: '把简历更新到最新版本', status: 'next', priority: 'p2', owner: 'me', project: '职业第二曲线', area: 'work' },
       { title: '给爸妈打个电话聊聊我们的计划', status: 'waiting', owner: 'both', area: 'family', waiting_on: '等我们俩先对齐' },
       { title: '整理一个「想尝试但还没试」的清单', status: 'someday', owner: 'both', area: 'explore' },
@@ -937,7 +999,7 @@ status:  inbox | now | next | waiting | someday | done | dropped
 priority: p0（最紧）… p3
 owner:    me | partner | both
 due:      YYYY-MM-DD
-pin:      true 表示「今天要碰」
+focus_week: 2026-W45 表示本周想做（软标记，无上限）
 \`\`\`
 
 当前路径：\`${dir}\`
@@ -1073,7 +1135,9 @@ function taskFromDocument(name, text) {
     project: typeof data.project === 'string' && data.project !== '' ? data.project : undefined,
     area: typeof data.area === 'string' && data.area !== '' ? data.area : undefined,
     due: typeof data.due === 'string' && data.due !== '' ? data.due : undefined,
-    pin: data.pin === true,
+    focus_week: typeof data.focus_week === 'string' && data.focus_week !== ''
+      ? data.focus_week
+      : data.pin === true ? weekLabel() : undefined,
     waiting_on: typeof data.waiting_on === 'string' && data.waiting_on !== '' ? data.waiting_on : undefined,
     tags: stringArray(data.tags),
     created: data.created ?? undefined,
@@ -1095,7 +1159,7 @@ function renderTask(task) {
     project: task.project,
     area: task.area,
     due: task.due,
-    pin: task.pin === true ? true : undefined,
+    focus_week: task.focus_week,
     waiting_on: task.waiting_on,
     tags: task.tags.length > 0 ? task.tags : undefined,
     created: task.created,
@@ -1119,6 +1183,9 @@ function projectFromDocument(name, text) {
     target: typeof data.target === 'string' && data.target !== '' ? data.target : undefined,
     next: typeof data.next === 'string' && data.next !== '' ? data.next : undefined,
     why: typeof data.why === 'string' && data.why !== '' ? data.why : undefined,
+    last_active: typeof data.last_active === 'string' && data.last_active !== ''
+      ? data.last_active
+      : (data.updated ?? data.created ?? undefined),
     created: data.created ?? undefined,
     updated: data.updated ?? undefined,
     notes: String(body ?? '').trim(),
@@ -1137,6 +1204,7 @@ function renderProject(project) {
     target: project.target,
     next: project.next,
     why: project.why,
+    last_active: project.last_active,
     created: project.created,
     updated: project.updated,
   }
@@ -1214,7 +1282,7 @@ export function computeStats(tasks, inbox) {
     someday: count('someday'),
     done: count('done'),
     dropped: count('dropped'),
-    pinned: tasks.filter((task) => task.pin && task.status !== 'done' && task.status !== 'dropped').length,
+    focus: tasks.filter((task) => task.focus_week === weekLabel() && task.status !== 'done' && task.status !== 'dropped').length,
     dueToday: tasks.filter((task) => task.status !== 'done' && task.status !== 'dropped' && task.due === today).length,
     overdue: tasks.filter((task) => task.status !== 'done' && task.status !== 'dropped' && typeof task.due === 'string' && task.due < today).length,
     doneThisWeek: doneThisWeek.length,
@@ -1230,8 +1298,8 @@ export function renderBrief(tasks, meta, options = {}) {
   const stats = computeStats(tasks, [])
   const inboxCount = options.inboxCount ?? 0
   const open = tasks.filter((task) => task.status !== 'done' && task.status !== 'dropped')
-  const pinned = open.filter((task) => task.pin)
-  const focus = pinned.length > 0 ? pinned.slice(0, 3) : open.filter((task) => task.status === 'now').slice(0, 3)
+  const focused = open.filter((task) => task.focus_week === weekLabel())
+  const focus = focused.length > 0 ? focused : open.filter((task) => task.status === 'now').slice(0, 3)
   const dueSoon = open
     .filter((task) => typeof task.due === 'string' && task.due >= today && task.due <= addDays(today, 7))
     .sort((left, right) => String(left.due).localeCompare(String(right.due)))
@@ -1242,9 +1310,9 @@ export function renderBrief(tasks, meta, options = {}) {
   const weekday = ['日', '一', '二', '三', '四', '五', '六'][date.getDay()]
   lines.push(`${date.getMonth() + 1}月${date.getDate()}日 周${weekday} · LifePM`)
   if (meta.focus !== '') lines.push(`主线：${meta.focus}`)
-  lines.push(`现在 ${stats.now} · 等待 ${stats.waiting} · 收件箱 ${inboxCount} · 本周完成 ${stats.doneThisWeek}`)
+  lines.push(`候选 ${stats.now} · 等待 ${stats.waiting} · 收件箱 ${inboxCount} · 本周完成 ${stats.doneThisWeek}`)
   if (focus.length > 0) {
-    lines.push('', '今天的三件事：')
+    lines.push('', '本周想做：')
     focus.forEach((task, index) => lines.push(`${index + 1}. ${task.title}${task.due ? `（${task.due}）` : ''}`))
   }
   if (overdue.length > 0) {
@@ -1271,7 +1339,7 @@ function buildReviewMarkdown({ week, tasks, projects, inbox, bounds }) {
   const done = tasks.filter((task) => task.status === 'done' && typeof task.done_at === 'string' && task.done_at.slice(0, 10) >= bounds.start && task.done_at.slice(0, 10) <= bounds.end)
   const open = tasks.filter((task) => task.status !== 'done' && task.status !== 'dropped')
   const waiting = open.filter((task) => task.status === 'waiting')
-  const stalled = projects.filter((project) => project.status === 'active' && (!project.updated || project.updated.slice(0, 10) < addDays(todayISO(), -21)))
+  const stalled = projects.filter((project) => project.status === 'active' && (!project.last_active || project.last_active.slice(0, 10) < addDays(todayISO(), -21)))
   const byOwner = (owner) => open.filter((task) => task.owner === owner).length
   const lines = [
     `# ${week} 复盘`,
@@ -1280,7 +1348,7 @@ function buildReviewMarkdown({ week, tasks, projects, inbox, bounds }) {
     '',
     '## 快照',
     '',
-    `- 未完成：${open.length} 件（现在 ${open.filter((task) => task.status === 'now').length} · 等待 ${waiting.length}）`,
+    `- 未完成：${open.length} 件（候选 ${open.filter((task) => task.status === 'now').length} · 等待 ${waiting.length}）`,
     `- 本周完成：${done.length} 件`,
     `- 收件箱待整理：${inbox.length} 条`,
     `- 分工：我 ${byOwner('me')} · TA ${byOwner('partner')} · 共同 ${byOwner('both')}`,

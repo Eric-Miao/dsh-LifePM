@@ -109,16 +109,23 @@ test('meta, journal, review', async (t) => {
   assert.match(review.body.review.body, /我的复盘/)
 })
 
-test('focus-today fills the pin set', async (t) => {
+test('focus is a soft weekly flag with no cap', async (t) => {
   const { base } = await harness(t)
-  await post(base, '/api/task', { op: 'create', title: 'A', status: 'now', priority: 'p1' })
-  await post(base, '/api/task', { op: 'create', title: 'B', status: 'now', priority: 'p0' })
-  await post(base, '/api/task', { op: 'create', title: 'C', status: 'next' })
-  const focus = await post(base, '/api/focus-today', {})
-  assert.equal(focus.status, 200)
-  assert.equal(focus.body.picked.length, 3)
+  for (let index = 0; index < 5; index += 1) {
+    await post(base, '/api/task', { op: 'create', title: `T${index}`, status: 'now', focus: true })
+  }
   const state = await get(base, '/api/state')
-  assert.equal(state.body.tasks.filter((task) => task.pin).length, 3)
+  assert.equal(state.body.focus.length, 5)
+  assert.equal(state.body.stats.focus, 5)
+})
+
+test('project touch updates last_active', async (t) => {
+  const { base } = await harness(t)
+  const created = await post(base, '/api/project', { op: 'upsert', name: 'tingjian' })
+  const before = created.body.project.last_active
+  await new Promise((resolve) => setTimeout(resolve, 5))
+  const touched = await post(base, '/api/project', { op: 'touch', name: 'tingjian' })
+  assert.ok(touched.body.project.last_active > before)
 })
 
 test('external ingest requires the token and writes the inbox', async (t) => {

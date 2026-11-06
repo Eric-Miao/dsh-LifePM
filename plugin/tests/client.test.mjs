@@ -58,17 +58,17 @@ function loadBundle() {
 function fixture() {
   const today = todayISO()
   const tasks = [
-    { id: 't-1', title: '确认领证需要的材料清单', status: 'now', priority: 'p1', owner: 'both', project: '婚礼筹备', area: 'relation', due: today, pin: true, tags: [], created: today, updated: today, notes: '民政局网站', file: '确认领证需要的材料清单.md' },
-    { id: 't-2', title: '约两家场地这周末去看', status: 'now', priority: 'p2', owner: 'partner', project: '婚礼筹备', area: 'relation', due: today, pin: false, tags: [], created: today, updated: today, notes: '', file: '约两家场地这周末去看.md' },
-    { id: 't-3', title: '算一遍年度预算', status: 'next', priority: 'p2', owner: 'me', project: '换一座城市', area: 'money', due: undefined, pin: false, tags: [], created: today, updated: today, notes: '', file: '算一遍年度预算.md' },
+    { id: 't-1', title: '确认领证需要的材料清单', status: 'now', priority: 'p1', owner: 'both', project: '婚礼筹备', area: 'relation', due: today, focus_week: weekLabel(), tags: [], created: today, updated: today, notes: '民政局网站', file: '确认领证需要的材料清单.md' },
+    { id: 't-2', title: '约两家场地这周末去看', status: 'now', priority: 'p2', owner: 'partner', project: '婚礼筹备', area: 'relation', due: today, tags: [], created: today, updated: today, notes: '', file: '约两家场地这周末去看.md' },
+    { id: 't-3', title: '算一遍年度预算', status: 'next', priority: 'p2', owner: 'me', project: '换一座城市', area: 'money', due: undefined, tags: [], created: today, updated: today, notes: '', file: '算一遍年度预算.md' },
     { id: 't-4', title: '给爸妈打电话', status: 'waiting', owner: 'both', waiting_on: '等我们俩先对齐', tags: [], created: today, updated: today, notes: '', file: '给爸妈打电话.md' },
     { id: 't-5', title: '整理想尝试的清单', status: 'someday', owner: 'both', tags: [], created: today, updated: today, notes: '', file: '整理想尝试的清单.md' },
     { id: 't-6', title: '把租房合同续约条件问清楚', status: 'done', owner: 'me', done_at: `${today}T10:00:00+08:00`, tags: [], created: today, updated: today, notes: '', file: '把租房合同续约条件问清楚.md' },
     { id: 't-7', title: '拖进来的一件事', status: 'inbox', tags: [], created: today, updated: today, notes: '', file: '拖进来的一件事.md' },
   ]
   const projects = [
-    { id: '婚礼筹备', name: '婚礼筹备', status: 'active', area: 'relation', owner: 'both', target: '2027-05', next: '定下场地和日期', why: '一场属于我们两个人的仪式', created: today, updated: today, notes: '', file: '婚礼筹备.md' },
-    { id: '换一座城市', name: '换一座城市', status: 'active', area: 'home', owner: 'both', target: '2027-Q1', next: '列出三个候选城市', created: today, updated: today, notes: '', file: '换一座城市.md' },
+    { id: '婚礼筹备', name: '婚礼筹备', status: 'active', area: 'relation', owner: 'both', target: '2027-05', next: '定下场地和日期', why: '一场属于我们两个人的仪式', created: today, updated: today, last_active: today, notes: '', file: '婚礼筹备.md' },
+    { id: '换一座城市', name: '换一座城市', status: 'active', area: 'home', owner: 'both', target: '2027-Q1', next: '列出三个候选城市', created: today, updated: today, last_active: today, notes: '', file: '换一座城市.md' },
   ]
   const inbox = [
     { index: 0, line: 3, createdAt: `${today} 09:12`, channel: '微信', text: '想到一个婚礼场地：海边的那个' },
@@ -100,6 +100,7 @@ function fixture() {
       { date: today, entries: [{ time: '09:12', kind: 'note', text: '把清单倒空了。' }] },
     ],
     reviews: [],
+    focus: tasks.filter((task) => task.focus_week === weekLabel() && task.status !== 'done' && task.status !== 'dropped'),
     stats: computeStats(tasks, inbox),
     today,
     week: weekLabel(),
@@ -189,25 +190,26 @@ async function mountApp(t, data) {
   return { container, root, dom, calls }
 }
 
-test('renders the board, today strip and task cards', async (t) => {
+test('renders the weekly home with focus and projects', async (t) => {
   const { container } = await mountApp(t, fixture())
-
   const text = container.textContent
-  assert.match(text, /把生活安顿下来/)
+  assert.match(text, /本周想做/)
   assert.match(text, /确认领证需要的材料清单/)
-  assert.match(text, /收件箱/)
-  assert.match(text, /想到一个婚礼场地/)
-  assert.match(text, /你说今天要碰的 1 件/)
-
-  const cards = container.querySelectorAll('.lpm-card')
-  assert.ok(cards.length >= 5, `expected task cards, got ${cards.length}`)
-
-  const columns = container.querySelectorAll('.lpm-col')
-  assert.equal(columns.length, 5, 'five open columns by default')
+  assert.match(text, /婚礼筹备/)
+  assert.match(text, /本周动过/)
+  assert.equal(container.querySelectorAll('.lpm-week-focus-row').length, 1)
+  assert.ok(container.querySelectorAll('.lpm-project-row').length >= 2)
 })
 
-test('opening a card shows the drawer and saving posts an update', async (t) => {
+test('the full board is one tab away and still opens the drawer', async (t) => {
   const { container, dom, calls } = await mountApp(t, fixture())
+  const boardTab = [...container.querySelectorAll('.lpm-tab')].find((button) => button.textContent.startsWith('全部'))
+  assert.ok(boardTab !== undefined, 'board tab present')
+  await act(async () => {
+    boardTab.dispatchEvent(new dom.window.MouseEvent('click', { bubbles: true }))
+  })
+  assert.ok(container.querySelector('.lpm-board') !== null)
+  assert.match(container.textContent, /候选/)
 
   const card = container.querySelector('.lpm-card')
   await act(async () => {
@@ -235,21 +237,20 @@ test('opening a card shows the drawer and saving posts an update', async (t) => 
   assert.equal(update.body.patch.title, '确认领证材料（新）')
 })
 
-test('switching to the projects tab renders the portfolio', async (t) => {
+test('projects tab lists every project with its next action', async (t) => {
   const { container, dom } = await mountApp(t, fixture())
-
   const tab = [...container.querySelectorAll('.lpm-tab')].find((button) => button.textContent.startsWith('项目'))
   await act(async () => {
     tab.dispatchEvent(new dom.window.MouseEvent('click', { bubbles: true }))
   })
-  assert.match(container.textContent, /项目组合/)
   assert.match(container.textContent, /婚礼筹备/)
+  assert.match(container.textContent, /定下场地和日期/)
+  assert.ok(container.querySelectorAll('.lpm-project-row').length >= 2)
 })
 
-test('journal, review and settings tabs render without crashing', async (t) => {
+test('records and settings render without crashing', async (t) => {
   const { container, dom } = await mountApp(t, fixture())
-
-  const click = async (label) => {
+  const clickTab = async (label) => {
     const tab = [...container.querySelectorAll('.lpm-tab')].find((button) => button.textContent.startsWith(label))
     assert.ok(tab !== undefined, `tab ${label} present`)
     await act(async () => {
@@ -257,15 +258,17 @@ test('journal, review and settings tabs render without crashing', async (t) => {
     })
   }
 
-  await click('日记')
+  await clickTab('记录')
   assert.match(container.textContent, /日记与决定/)
   assert.match(container.textContent, /把清单倒空了/)
 
-  await click('复盘')
+  const reviewToggle = [...container.querySelectorAll('.lpm-seg button')].find((button) => button.textContent === '复盘')
+  await act(async () => {
+    reviewToggle.dispatchEvent(new dom.window.MouseEvent('click', { bubbles: true }))
+  })
   assert.match(container.textContent, /每周复盘/)
-  assert.match(container.textContent, /这一周还没有复盘/)
 
-  await click('设置')
+  await clickTab('设置')
   assert.match(container.textContent, /这一季/)
   assert.match(container.textContent, /连接器/)
   assert.match(container.textContent, /\/lifepm\/inbox/)

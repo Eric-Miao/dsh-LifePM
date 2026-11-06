@@ -67,7 +67,7 @@ export function TaskDrawer({ task, onClose }) {
       area: draft.area === '' ? null : draft.area,
       priority: draft.priority === '' ? null : draft.priority,
       due: draft.due === '' ? null : draft.due,
-      pin: draft.pin,
+      focus: draft.focus,
       waiting_on: draft.waitingOn === '' ? null : draft.waitingOn,
       notes: draft.notes,
     }
@@ -173,11 +173,11 @@ export function TaskDrawer({ task, onClose }) {
             ? React.createElement(Button, { size: 'sm', variant: 'ghost', onClick: () => update({ due: '' }) }, '清除日期')
             : null),
         React.createElement('div', { className: 'lpm-toggle-row' },
-          React.createElement('span', null, '放进「今天的三件事」'),
+          React.createElement('span', null, '放进「本周想做」'),
           React.createElement(Toggle, {
-            checked: draft.pin,
-            onChange: (value) => update({ pin: value }),
-            label: '放进今天',
+            checked: draft.focus,
+            onChange: (value) => update({ focus: value }),
+            label: '加入本周想做',
           })),
         draft.status === 'waiting'
           ? React.createElement(Field, { label: '在等什么', hint: '人 / 条件 / 回复' },
@@ -227,7 +227,7 @@ function toDraft(task) {
     area: task.area ?? '',
     priority: task.priority ?? '',
     due: task.due ?? '',
-    pin: task.pin === true,
+    focus: task.focus_week !== undefined,
     waitingOn: task.waiting_on ?? '',
     notes: task.notes ?? '',
   }

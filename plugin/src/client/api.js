@@ -41,6 +41,7 @@ export const api = {
   deleteTask: (id) => request('task', { op: 'delete', id }),
   saveProject: (input) => request('project', { op: 'upsert', ...input }),
   deleteProject: (id) => request('project', { op: 'delete', id, unlinkTasks: true }),
+  touchProject: (id) => request('project', { op: 'touch', id }),
   saveMeta: (patch) => request('meta', patch),
   journal: (text, kind, date) => request('journal', { text, kind, date }),
   capture: (text, channel = 'app') => request('inbox', { op: 'add', text, channel }),

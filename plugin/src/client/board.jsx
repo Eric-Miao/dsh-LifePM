@@ -44,7 +44,6 @@ function BoardInner() {
   }
 
   return React.createElement('div', { className: 'lpm-view' },
-    React.createElement(TodayStrip, null),
     React.createElement(StatsLine, null),
     React.createElement('div', { className: 'lpm-board' },
       COLUMN_ORDER.map((status) => React.createElement(Column, {
@@ -96,61 +95,12 @@ function BoardInner() {
       React.createElement('span', { className: 'lpm-muted' }, '本周完成 ', React.createElement('b', { style: { fontFamily: 'var(--lpm-serif)' } }, data.stats.doneThisWeek), ' 件')))
 }
 
-/** Pinned three things for today. */
-function TodayStrip() {
-  const { data, act, openTask } = usePM()
-  const open = data.tasks.filter((task) => task.status !== 'done' && task.status !== 'dropped')
-  const pinned = open.filter((task) => task.pin)
-  const [working, setWorking] = useState(false)
-
-  const complete = (task) => {
-    void act(() => api.updateTask(task.id, { status: 'done' }), `完成：${clip(task.title, 24)}`)
-  }
-
-  const autoPick = async () => {
-    setWorking(true)
-    try {
-      await act(() => api.focusToday(), '已挑出今天的三件事')
-    } finally {
-      setWorking(false)
-    }
-  }
-
-  return React.createElement('section', { className: 'lpm-today', 'aria-label': '今日三件事' },
-    React.createElement('div', { className: 'lpm-today-label' },
-      React.createElement('b', null, 'TODAY'),
-      React.createElement('span', null, pinned.length > 0 ? `你说今天要碰的 ${pinned.length} 件` : '今天碰哪三件？')),
-    React.createElement('div', { className: 'lpm-today-list' },
-      pinned.length === 0
-        ? React.createElement('div', { className: 'lpm-today-empty' },
-            React.createElement('span', null, '还没有挑今天的重点。'),
-            React.createElement(Button, { size: 'sm', variant: 'quiet', icon: 'sparkle', disabled: working, onClick: () => void autoPick() },
-              working ? '挑选中…' : '自动挑 3 件'))
-        : pinned.map((task) => React.createElement('div', { key: task.id, className: 'lpm-today-item' },
-            React.createElement('button', {
-              type: 'button',
-              className: 'lpm-check',
-              'aria-label': `完成 ${task.title}`,
-              onClick: () => complete(task),
-            }, React.createElement(Icon, { name: 'check', size: 10 })),
-            React.createElement('button', {
-              type: 'button',
-              style: { border: 0, background: 'transparent', padding: 0, textAlign: 'left', color: 'inherit', font: 'inherit' },
-              onClick: () => openTask(task.id),
-              title: task.title,
-            }, task.title)))),
-    React.createElement('div', { className: 'lpm-today-side' },
-      pinned.length > 0 && pinned.length < 3
-        ? React.createElement(Button, { size: 'sm', variant: 'ghost', icon: 'plus', disabled: working, onClick: () => void autoPick() }, '再挑一件')
-        : null))
-}
-
 /** One-line numbers. */
 function StatsLine() {
   const { data } = usePM()
   const stats = data.stats
   return React.createElement('div', { className: 'lpm-stats' },
-    React.createElement('span', { className: 'lpm-stat' }, React.createElement('b', null, stats.now), '现在'),
+    React.createElement('span', { className: 'lpm-stat' }, React.createElement('b', null, stats.now), '候选'),
     React.createElement('span', { className: 'lpm-sep' }),
     React.createElement('span', { className: 'lpm-stat' }, React.createElement('b', null, stats.waiting), '等待'),
     React.createElement('span', { className: 'lpm-sep' }),
@@ -281,7 +231,8 @@ function InboxCaptures() {
 
 /** One task card. */
 export function TaskCard({ task, people, areas, projects, onDragStart, onDragEnd, compact = false }) {
-  const { openTask, act } = usePM()
+  const { data, openTask, act } = usePM()
+  const focused = typeof task.focus_week === 'string' && task.focus_week === data.week
   const [dragging, setDragging] = useState(false)
   const due = describeDue(task.due)
   const project = projects.find((item) => item.id === task.project || item.name === task.project)
@@ -346,6 +297,7 @@ export function TaskCard({ task, people, areas, projects, onDragStart, onDragEnd
                 React.createElement(Icon, { name: 'clock', size: 11 }),
                 clip(task.waiting_on, 10))
             : null,
+          focused ? React.createElement('span', { className: 'lpm-chip lpm-chip-focus', title: '本周想做' }, '本周') : null,
           React.createElement('span', { style: { flex: '1 1 auto' } }),
           task.owner !== undefined
             ? React.createElement('span', { className: 'lpm-avatar', 'data-owner': task.owner, title: `负责：${task.owner === 'both' ? '两个人' : task.owner === 'me' ? '我' : 'TA'}` },

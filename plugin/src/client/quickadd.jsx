@@ -8,7 +8,7 @@ import { Icon } from './ui.jsx'
  * The server parses the quick-add syntax (`#project`, `@owner`, `!p1`,
  * `due:周五`) so the browser and the connectors share one grammar.
  */
-export function QuickAdd({ status = 'inbox', autoFocus = false, onDone }) {
+export function QuickAdd({ status = 'inbox', project, autoFocus = false, onDone }) {
   const { act, openTask } = usePM()
   const [text, setText] = useState('')
   const [busy, setBusy] = useState(false)
@@ -25,7 +25,7 @@ export function QuickAdd({ status = 'inbox', autoFocus = false, onDone }) {
       return
     }
     setBusy(true)
-    const result = await act(() => api.createTask({ quickAdd: value, status }), '已添加')
+    const result = await act(() => api.createTask({ quickAdd: value, status, ...(project === undefined ? {} : { project }) }), '已添加')
     setBusy(false)
     if (result !== null) {
       setText('')

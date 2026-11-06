@@ -448,12 +448,12 @@ function ordinalKeys(data, order) {
 /** Canonical front-matter key order for every task file. */
 export const TASK_KEYS = [
   'id', 'title', 'status', 'priority', 'owner', 'project', 'area',
-  'due', 'pin', 'waiting_on', 'tags', 'created', 'updated', 'done_at',
+  'due', 'focus_week', 'waiting_on', 'tags', 'created', 'updated', 'done_at',
 ]
 
 /** Canonical front-matter key order for every project file. */
 export const PROJECT_KEYS = [
-  'id', 'name', 'status', 'area', 'owner', 'target', 'next', 'why', 'created', 'updated',
+  'id', 'name', 'status', 'area', 'owner', 'target', 'next', 'why', 'last_active', 'created', 'updated',
 ]
 
 /** Canonical front-matter key order for the store meta file. */
